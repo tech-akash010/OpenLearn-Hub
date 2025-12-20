@@ -1,21 +1,25 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  X, 
-  ChevronRight, 
-  ChevronLeft, 
-  Check, 
-  Plus, 
-  Cloud, 
-  Image as ImageIcon, 
+import {
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  Plus,
+  Cloud,
+  Image as ImageIcon,
   Type as TextIcon,
   Trash2,
   UploadCloud,
   FileText
 } from 'lucide-react';
 import { INITIAL_SUBJECTS, INITIAL_TOPICS, INITIAL_SUBTOPICS } from '../constants';
-import { Difficulty } from '../types';
+import { Difficulty, Quiz, ContentSourceMetadata } from '../types';
 import { driveSyncService } from '../services/driveSyncService';
+import { authService } from '../services/authService';
+import { QuizAttachment } from './QuizAttachment';
+import { ContentSourceForm } from './ContentSourceForm';
+import { validateSourceRequirement } from '../services/contentSourceValidator';
 
 interface UploadWizardProps {
   onClose: () => void;
@@ -38,7 +42,9 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
     isNewSubtopic: false,
     newName: '',
     attachedImage: null as string | null,
-    attachedPdf: null as { name: string; data: string } | null
+    attachedPdf: null as { name: string; data: string } | null,
+    attachedQuiz: null as Quiz | null,
+    sourceMetadata: null as ContentSourceMetadata | null
   });
 
   const [filteredTopics, setFilteredTopics] = useState(INITIAL_TOPICS);
@@ -77,12 +83,12 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
     if (file && file.type === 'application/pdf') {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSelection(prev => ({ 
-          ...prev, 
-          attachedPdf: { 
-            name: file.name, 
-            data: reader.result as string 
-          } 
+        setSelection(prev => ({
+          ...prev,
+          attachedPdf: {
+            name: file.name,
+            data: reader.result as string
+          }
         }));
       };
       reader.readAsDataURL(file);
@@ -104,6 +110,13 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
     if (step === 2) return selection.topic !== '' || (selection.isNewTopic && selection.newName);
     if (step === 3) return selection.subtopic !== '' || (selection.isNewSubtopic && selection.newName);
     if (step === 4) return selection.title && (selection.content || selection.attachedImage || selection.attachedPdf);
+    if (step === 5) {
+      // Source tags are required
+      if (!selection.sourceMetadata) return false;
+      const validation = validateSourceRequirement(selection.sourceMetadata);
+      return validation.valid;
+    }
+    if (step === 6) return true; // Quiz is optional
     return false;
   };
 
@@ -116,7 +129,8 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
       subject,
       topic,
       subtopic,
-      title: selection.title
+      title: selection.title,
+      quiz: selection.attachedQuiz
     });
 
     onComplete(selection);
@@ -138,9 +152,9 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
 
         {/* Steps Progress */}
         <div className="flex px-10 pt-6 space-x-2">
-           {[1, 2, 3, 4].map(s => (
-             <div key={s} className={`h-2 flex-1 rounded-full transition-all duration-500 ${s <= step ? 'bg-blue-600' : 'bg-gray-100'}`} />
-           ))}
+          {[1, 2, 3, 4, 5, 6].map(s => (
+            <div key={s} className={`h-2 flex-1 rounded-full transition-all duration-500 ${s <= step ? 'bg-blue-600' : 'bg-gray-100'}`} />
+          ))}
         </div>
 
         {/* Content */}
@@ -176,7 +190,7 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                   placeholder="Enter Subject Name..."
                   className="w-full px-5 py-3 rounded-2xl bg-amber-900 text-white border-none focus:ring-4 focus:ring-amber-200 outline-none font-bold placeholder:text-amber-400"
                   value={selection.newName}
-                  onChange={e => setSelection({...selection, newName: e.target.value})}
+                  onChange={e => setSelection({ ...selection, newName: e.target.value })}
                 />
               )}
             </div>
@@ -213,7 +227,7 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                   placeholder="Topic Name..."
                   className="w-full px-5 py-3 rounded-2xl bg-blue-900 text-white border-none focus:ring-4 focus:ring-blue-200 outline-none font-bold placeholder:text-blue-400"
                   value={selection.newName}
-                  onChange={e => setSelection({...selection, newName: e.target.value})}
+                  onChange={e => setSelection({ ...selection, newName: e.target.value })}
                 />
               )}
             </div>
@@ -250,7 +264,7 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                   placeholder="Subtopic Name..."
                   className="w-full px-5 py-3 rounded-2xl bg-blue-900 text-white border-none focus:ring-4 focus:ring-blue-200 outline-none font-bold placeholder:text-blue-400"
                   value={selection.newName}
-                  onChange={e => setSelection({...selection, newName: e.target.value})}
+                  onChange={e => setSelection({ ...selection, newName: e.target.value })}
                 />
               )}
             </div>
@@ -266,7 +280,7 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                     className="w-full px-6 py-4 rounded-2xl bg-gray-900 text-white border-none focus:ring-4 focus:ring-blue-200 outline-none text-xl font-black placeholder:text-gray-500"
                     placeholder="Enter a descriptive title..."
                     value={selection.title}
-                    onChange={e => setSelection({...selection, title: e.target.value})}
+                    onChange={e => setSelection({ ...selection, title: e.target.value })}
                   />
                 </div>
 
@@ -281,7 +295,7 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                       className="w-full px-6 py-5 rounded-3xl bg-gray-900 text-white border-none focus:ring-4 focus:ring-blue-200 outline-none font-medium text-sm leading-relaxed placeholder:text-gray-500"
                       placeholder="Explain the core concepts in detail..."
                       value={selection.content}
-                      onChange={e => setSelection({...selection, content: e.target.value})}
+                      onChange={e => setSelection({ ...selection, content: e.target.value })}
                     />
                   </div>
 
@@ -292,16 +306,16 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                       <label className="flex items-center text-xs font-black text-indigo-600 uppercase tracking-widest">
                         <ImageIcon size={14} className="mr-2" /> Visual Aids
                       </label>
-                      
+
                       {!selection.attachedImage ? (
-                        <div 
+                        <div
                           onClick={() => fileInputRef.current?.click()}
                           className="group relative h-40 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all overflow-hidden"
                         >
-                          <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            className="hidden" 
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
                             accept="image/*"
                             onChange={handleImageUpload}
                           />
@@ -310,13 +324,13 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                         </div>
                       ) : (
                         <div className="relative h-40 rounded-[2rem] overflow-hidden group shadow-md border border-gray-100">
-                          <img 
-                            src={selection.attachedImage} 
-                            alt="Preview" 
+                          <img
+                            src={selection.attachedImage}
+                            alt="Preview"
                             className="w-full h-full object-cover"
                           />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button 
+                            <button
                               onClick={removeImage}
                               className="p-3 bg-red-600 text-white rounded-xl hover:scale-110 transition-transform shadow-xl"
                             >
@@ -332,16 +346,16 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                       <label className="flex items-center text-xs font-black text-emerald-600 uppercase tracking-widest">
                         <FileText size={14} className="mr-2" /> Document Attachment (PDF)
                       </label>
-                      
+
                       {!selection.attachedPdf ? (
-                        <div 
+                        <div
                           onClick={() => pdfInputRef.current?.click()}
                           className="group relative h-40 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-all overflow-hidden"
                         >
-                          <input 
-                            type="file" 
-                            ref={pdfInputRef} 
-                            className="hidden" 
+                          <input
+                            type="file"
+                            ref={pdfInputRef}
+                            className="hidden"
                             accept="application/pdf"
                             onChange={handlePdfUpload}
                           />
@@ -353,7 +367,7 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                           <FileText size={40} className="text-emerald-600 mb-2" />
                           <p className="text-xs font-bold text-emerald-900 truncate w-full px-4">{selection.attachedPdf.name}</p>
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button 
+                            <button
                               onClick={removePdf}
                               className="p-3 bg-red-600 text-white rounded-xl hover:scale-110 transition-transform shadow-xl"
                             >
@@ -378,6 +392,43 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
               </div>
             </div>
           )}
+
+          {step === 5 && (
+            <div className="space-y-6 animate-in slide-in-from-right-4">
+              <div className="space-y-2 mb-6">
+                <label className="text-xs font-black text-blue-600 uppercase tracking-widest">Step 5: Academic Source</label>
+                <h3 className="text-2xl font-bold text-gray-900 leading-tight">Add source reference</h3>
+                <p className="text-sm text-gray-600">Provide at least one academic source for your content</p>
+              </div>
+
+              <ContentSourceForm
+                onSourceChange={(metadata) => {
+                  setSelection({ ...selection, sourceMetadata: metadata });
+                }}
+                initialMetadata={selection.sourceMetadata || undefined}
+              />
+            </div>
+          )}
+
+          {step === 6 && (
+            <div className="space-y-6 animate-in slide-in-from-right-4">
+              <div className="space-y-2 mb-6">
+                <label className="text-xs font-black text-purple-600 uppercase tracking-widest">Step 6: Quiz (Optional)</label>
+                <h3 className="text-2xl font-bold text-gray-900 leading-tight">Add a quiz to test knowledge</h3>
+                <p className="text-sm text-gray-600">Help learners verify their understanding with an optional quiz</p>
+              </div>
+
+              <QuizAttachment
+                user={authService.getUser()!}
+                subject={INITIAL_SUBJECTS.find(s => s.id === selection.subject)?.name || selection.newName}
+                topic={INITIAL_TOPICS.find(t => t.id === selection.topic)?.title || selection.newName}
+                onQuizAttached={(quiz) => {
+                  setSelection({ ...selection, attachedQuiz: quiz });
+                }}
+                onSkip={() => { }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -398,12 +449,12 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
             </button>
           </div>
           <button
-            onClick={step === 4 ? handleSubmit : handleNext}
+            onClick={step === 6 ? handleSubmit : handleNext}
             disabled={!canProgress()}
             className={`flex items-center space-x-2 px-10 py-3.5 rounded-2xl font-black transition-all shadow-xl ${canProgress() ? 'bg-blue-600 text-white shadow-blue-200 hover:scale-105 active:scale-95' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
           >
-            <span>{step === 4 ? 'Confirm & Sync' : 'Next Level'}</span>
-            {step < 4 && <ChevronRight size={20} />}
+            <span>{step === 6 ? 'Confirm & Sync' : 'Next Level'}</span>
+            {step < 6 && <ChevronRight size={20} />}
           </button>
         </div>
       </div>

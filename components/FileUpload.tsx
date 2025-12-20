@@ -39,7 +39,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         e.preventDefault();
         setIsDragging(false);
 
-        const files = Array.from(e.dataTransfer.files);
+        const files = Array.from<File>(e.dataTransfer.files);
         if (files.length > 0) {
             handleFile(files[0]);
         }

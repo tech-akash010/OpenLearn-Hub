@@ -8,6 +8,7 @@ import { RoleSelector } from '../components/RoleSelector';
 import { StudentVerificationForm } from '../components/StudentVerificationForm';
 import { TeacherVerificationForm } from '../components/TeacherVerificationForm';
 import { EducatorVerificationForm } from '../components/EducatorVerificationForm';
+import { CommunityContributorForm } from '../components/CommunityContributorForm';
 
 type SignUpStep = 'credentials' | 'role' | 'verification' | 'complete';
 
@@ -278,6 +279,12 @@ export const SignUpPage: React.FC = () => {
                                         onSubmit={handleVerificationSubmit}
                                     />
                                 )}
+
+                                {selectedRole === 'community_contributor' && (
+                                    <CommunityContributorForm
+                                        onSubmit={handleVerificationSubmit}
+                                    />
+                                )}
                             </div>
                         )}
 
@@ -290,7 +297,8 @@ export const SignUpPage: React.FC = () => {
                                 <h2 className="text-3xl font-black text-gray-900 mb-3">Welcome to OpenLearn Hub!</h2>
                                 <p className="text-gray-600 font-medium mb-8 max-w-md mx-auto">
                                     Your account has been created successfully.
-                                    {selectedRole !== 'student' && ' Your verification is being reviewed.'}
+                                    {selectedRole === 'community_contributor' && ' Start building your trust level through quality contributions!'}
+                                    {selectedRole !== 'student' && selectedRole !== 'community_contributor' && ' Your verification is being reviewed.'}
                                 </p>
                                 <button
                                     onClick={handleComplete}

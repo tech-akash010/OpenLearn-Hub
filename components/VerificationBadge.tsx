@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { GraduationCap, BookOpen, Globe, ShieldCheck } from 'lucide-react';
+import { GraduationCap, BookOpen, Globe, ShieldCheck, Medal, Users } from 'lucide-react';
 import { User } from '../types';
+import { trustLevelService } from '../services/trustLevelService';
 
 interface VerificationBadgeProps {
     user: User;
@@ -56,6 +57,26 @@ export const VerificationBadge: React.FC<VerificationBadgeProps> = ({
                     textColor: 'text-green-700',
                     borderColor: 'border-green-200',
                     iconColor: 'text-green-600'
+                };
+            case 'community_contributor':
+                if (user.communityMetrics) {
+                    const levelInfo = trustLevelService.getTrustLevelInfo(user.communityMetrics.trustLevel);
+                    return {
+                        icon: Medal,
+                        label: levelInfo.label,
+                        bgColor: levelInfo.bgColor,
+                        textColor: levelInfo.textColor,
+                        borderColor: levelInfo.borderColor,
+                        iconColor: levelInfo.iconColor
+                    };
+                }
+                return {
+                    icon: Users,
+                    label: 'Community Contributor',
+                    bgColor: 'bg-orange-50',
+                    textColor: 'text-orange-700',
+                    borderColor: 'border-orange-200',
+                    iconColor: 'text-orange-600'
                 };
             default:
                 return {

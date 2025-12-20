@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { GraduationCap, BookOpen, Globe, Check } from 'lucide-react';
+import { GraduationCap, BookOpen, Globe, Users, Check } from 'lucide-react';
 import { UserRole } from '../types';
 
 interface RoleSelectorProps {
@@ -14,7 +14,7 @@ const roles = [
         icon: GraduationCap,
         title: 'Student',
         description: 'Access learning materials, take quizzes, and chat with PDFs',
-        features: ['Take quizzes', 'Chat with PDFs', 'Access all content', 'Track progress'],
+        features: ['Upload notes', 'Take quizzes', 'Chat with PDFs', 'Access all content'],
         color: 'blue'
     },
     {
@@ -34,6 +34,14 @@ const roles = [
         features: ['Create courses', 'Upload materials', 'Build portfolio', 'Reach students'],
         color: 'green',
         requiresVerification: true
+    },
+    {
+        id: 'community_contributor' as UserRole,
+        icon: Users,
+        title: 'Community Contributor',
+        description: 'Share knowledge without professional credentials. Build trust through quality contributions.',
+        features: ['No documents required', 'Start immediately', 'Earn trust', 'Auto upgrades'],
+        color: 'orange'
     }
 ];
 
@@ -61,6 +69,14 @@ const colorClasses = {
         icon: 'text-green-600',
         iconBg: 'bg-green-100',
         check: 'bg-green-600'
+    },
+    orange: {
+        bg: 'bg-orange-50',
+        border: 'border-orange-200',
+        selectedBorder: 'border-orange-500',
+        icon: 'text-orange-600',
+        iconBg: 'bg-orange-100',
+        check: 'bg-orange-600'
     }
 };
 

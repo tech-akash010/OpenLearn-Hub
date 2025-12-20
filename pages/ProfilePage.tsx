@@ -1,24 +1,26 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  User as UserIcon, 
-  Mail, 
-  Shield, 
-  Calendar, 
-  Award, 
-  TrendingUp, 
-  Flame, 
-  Cloud, 
-  Settings, 
-  Edit3, 
-  LogOut, 
-  CheckCircle2, 
-  Clock, 
+import {
+  User as UserIcon,
+  Mail,
+  Shield,
+  Calendar,
+  Award,
+  TrendingUp,
+  Flame,
+  Cloud,
+  Settings,
+  Edit3,
+  LogOut,
+  CheckCircle2,
+  Clock,
   Database,
-  ChevronRight
+  ChevronRight,
+  AlertTriangle
 } from 'lucide-react';
 import { authService } from '../services/authService';
 import { driveSyncService } from '../services/driveSyncService';
+import { TrustLevelIndicator } from '../components/TrustLevelIndicator';
 import { useNavigate } from 'react-router-dom';
 
 export const ProfilePage: React.FC = () => {
@@ -75,8 +77,8 @@ export const ProfilePage: React.FC = () => {
                 </div>
                 {isEditing ? (
                   <div className="flex items-center space-x-4">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       className="text-4xl font-black text-gray-900 border-b-4 border-blue-600 outline-none bg-transparent py-1"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
@@ -91,13 +93,13 @@ export const ProfilePage: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4 pb-4">
-              <button 
+              <button
                 onClick={() => setIsEditing(!isEditing)}
                 className="flex items-center space-x-2 bg-gray-50 text-gray-600 px-6 py-3.5 rounded-2xl font-black hover:bg-gray-100 transition-all border border-gray-100"
               >
                 <Edit3 size={18} /> <span>Edit Profile</span>
               </button>
-              <button 
+              <button
                 onClick={handleLogout}
                 className="flex items-center space-x-2 bg-red-50 text-red-600 px-6 py-3.5 rounded-2xl font-black hover:bg-red-100 transition-all border border-red-100"
               >
@@ -150,10 +152,58 @@ export const ProfilePage: React.FC = () => {
             </div>
             <Flame size={120} className="absolute -bottom-10 -right-10 text-white/5 group-hover:scale-125 transition-transform" />
           </div>
+
+          {/* Community Contributor Warning */}
+          {user.role === 'community_contributor' && (
+            <div className="bg-red-900 p-10 rounded-[3rem] text-white shadow-2xl shadow-red-200 relative overflow-hidden border-2 border-red-700">
+              <div className="flex items-start space-x-4 mb-4">
+                <div className="p-3 bg-red-800 rounded-2xl">
+                  <AlertTriangle size={24} className="text-red-200" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-red-100 mb-2">⚠️ Community Guidelines</h3>
+                  <p className="text-sm text-red-200 font-medium leading-relaxed">
+                    Spam, plagiarism, or any form of misconduct will result in <span className="font-black text-white">permanent account suspension</span> without warning.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 pt-6 border-t border-red-800">
+                <p className="text-xs font-bold text-red-300 uppercase tracking-widest mb-3">Prohibited Actions:</p>
+                <ul className="space-y-2 text-sm text-red-200">
+                  <li className="flex items-start space-x-2">
+                    <span className="text-red-400 font-bold">•</span>
+                    <span>Uploading spam or irrelevant content</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-red-400 font-bold">•</span>
+                    <span>Plagiarizing or copying without attribution</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-red-400 font-bold">•</span>
+                    <span>Harassment or abusive behavior</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-red-400 font-bold">•</span>
+                    <span>Vote manipulation or fake engagement</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Columns: Activity & Summary */}
         <div className="lg:col-span-2 space-y-8">
+          {/* Community Contributor Trust Level */}
+          {user.role === 'community_contributor' && user.communityMetrics && (
+            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+              <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center uppercase tracking-widest text-[11px] text-gray-400">
+                <Award size={18} className="mr-3 text-orange-500" /> Your Trust Level
+              </h3>
+              <TrustLevelIndicator metrics={user.communityMetrics} showDetails={true} />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
               <div className="flex items-center justify-between mb-6">
@@ -204,9 +254,8 @@ export const ProfilePage: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
-                      item.source === 'Uploaded' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-blue-50 text-blue-600 border-blue-100'
-                    }`}>
+                    <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${item.source === 'Uploaded' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                      }`}>
                       {item.source}
                     </span>
                     <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />

@@ -1,6 +1,7 @@
 
 import { User, UserRole, VerificationStatus, VerificationData } from '../types';
 import { emailValidator } from '../utils/emailValidator';
+import { trustLevelService } from './trustLevelService';
 
 const AUTH_STORAGE_KEY = 'openlearn_auth_user';
 
@@ -36,8 +37,10 @@ export const authService = {
     const isInstitutional = emailValidator.isInstitutionalEmail(email);
     const verificationLevel = emailValidator.getVerificationLevel(email);
 
-    // Auto-verify institutional emails
-    const verificationStatus: VerificationStatus = isInstitutional ? 'verified' : 'unverified';
+    // Auto-verify institutional emails (not applicable to community contributors)
+    const verificationStatus: VerificationStatus =
+      role === 'community_contributor' ? 'verified' :
+        isInstitutional ? 'verified' : 'unverified';
 
     const newUser: User = {
       id: `user_${Date.now()}`,
@@ -45,11 +48,13 @@ export const authService = {
       email: email,
       role: role,
       verificationStatus: verificationStatus,
-      verificationLevel: verificationLevel,
+      verificationLevel: role === 'community_contributor' ? 'basic' : verificationLevel,
       joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       reputation: 0,
       badges: [],
-      avatar: name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+      avatar: name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+      // Initialize community metrics for community contributors
+      communityMetrics: role === 'community_contributor' ? trustLevelService.getInitialMetrics() : undefined
     };
 
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
@@ -107,7 +112,12 @@ export const authService = {
   canUploadNotes(user: User | null): boolean {
     if (!user) return false;
 
-    // All verified users can upload notes
+    // Community contributors need silver or gold trust level
+    if (user.role === 'community_contributor') {
+      return user.communityMetrics?.canUploadNotes || false;
+    }
+
+    // All other verified users can upload notes
     return user.verificationStatus === 'verified';
   },
 
@@ -145,6 +155,12 @@ export const authService = {
         return 'Teacher Verified';
       case 'online_educator':
         return 'Educator Verified';
+      case 'community_contributor':
+        if (user.communityMetrics) {
+          const levelInfo = trustLevelService.getTrustLevelInfo(user.communityMetrics.trustLevel);
+          return levelInfo.label;
+        }
+        return 'Community Contributor';
       default:
         return 'Verified';
     }

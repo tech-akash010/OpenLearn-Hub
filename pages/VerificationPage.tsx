@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { authService } from '../services/authService';
 import { User, VerificationStatus } from '../types';
+import { TrustLevelIndicator } from '../components/TrustLevelIndicator';
 
 export const VerificationPage: React.FC = () => {
     const navigate = useNavigate();
@@ -85,6 +86,7 @@ export const VerificationPage: React.FC = () => {
             case 'student': return 'Student';
             case 'teacher': return 'Teacher';
             case 'online_educator': return 'Online Educator';
+            case 'community_contributor': return 'Community Contributor';
             default: return role;
         }
     };
@@ -268,6 +270,37 @@ export const VerificationPage: React.FC = () => {
                                         </p>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {/* Community Contributor Trust Level */}
+                        {user.role === 'community_contributor' && user.communityMetrics && (
+                            <div>
+                                <h2 className="text-lg font-black text-gray-900 mb-4">Trust Level & Metrics</h2>
+                                <TrustLevelIndicator metrics={user.communityMetrics} showDetails={true} />
+
+                                {/* Tips for Improving Trust */}
+                                <div className="mt-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl border border-blue-100 p-6">
+                                    <h3 className="font-black text-gray-900 mb-3">💡 Tips to Improve Your Trust Score</h3>
+                                    <ul className="space-y-2 text-sm text-gray-700">
+                                        <li className="flex items-start space-x-2">
+                                            <span className="text-blue-600 font-bold">•</span>
+                                            <span>Upload high-quality, well-organized notes that help others learn</span>
+                                        </li>
+                                        <li className="flex items-start space-x-2">
+                                            <span className="text-blue-600 font-bold">•</span>
+                                            <span>Engage positively with the community through helpful comments</span>
+                                        </li>
+                                        <li className="flex items-start space-x-2">
+                                            <span className="text-blue-600 font-bold">•</span>
+                                            <span>Ensure your content is accurate and properly cited</span>
+                                        </li>
+                                        <li className="flex items-start space-x-2">
+                                            <span className="text-blue-600 font-bold">•</span>
+                                            <span>Respond to feedback and improve your contributions over time</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         )}
 
