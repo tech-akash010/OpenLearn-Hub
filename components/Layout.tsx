@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { authService } from '../services/authService';
 import { User } from '../types';
+import { AIChatbot } from './AIChatbot';
 
 const NavItem: React.FC<{ to: string; icon: React.ReactNode; label: string; active: boolean }> = ({ to, icon, label, active }) => (
   <Link
@@ -168,6 +169,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
+
+      {/* Global AI Chatbot */}
+      {user && <AIChatbot />}
     </div>
   );
 };
