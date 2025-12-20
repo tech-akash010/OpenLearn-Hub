@@ -10,6 +10,7 @@ import { ContentDetail } from './pages/ContentDetail';
 import { DriveOrganizer } from './pages/DriveOrganizer';
 import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { AIChatPage } from './pages/AIChatPage';
 import { authService } from './services/authService';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -56,6 +57,12 @@ const App: React.FC = () => {
           <Route path="/hub/subject/:subjectId/topic/:topicId/subtopic/:subtopicId" element={
             <PrivateRoute>
               <ContentDetail />
+            </PrivateRoute>
+          } />
+          
+          <Route path="/ai-assistant" element={
+            <PrivateRoute>
+              <AIChatPage />
             </PrivateRoute>
           } />
           
