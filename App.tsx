@@ -9,6 +9,8 @@ import { SubtopicExplorer } from './pages/SubtopicExplorer';
 import { ContentDetail } from './pages/ContentDetail';
 import { DriveOrganizer } from './pages/DriveOrganizer';
 import { LoginPage } from './pages/LoginPage';
+import { SignUpPage } from './pages/SignUpPage';
+import { VerificationPage } from './pages/VerificationPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { authService } from './services/authService';
 
@@ -30,13 +32,14 @@ const App: React.FC = () => {
       <Layout>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          
+          <Route path="/signup" element={<SignUpPage />} />
+
           <Route path="/" element={
             <PrivateRoute>
               <Dashboard />
             </PrivateRoute>
           } />
-          
+
           {/* Strict Hierarchy Routes */}
           <Route path="/hub" element={
             <PrivateRoute>
@@ -58,7 +61,7 @@ const App: React.FC = () => {
               <ContentDetail />
             </PrivateRoute>
           } />
-          
+
           <Route path="/drive" element={
             <PrivateRoute>
               <DriveOrganizer />
@@ -67,6 +70,11 @@ const App: React.FC = () => {
           <Route path="/profile" element={
             <PrivateRoute>
               <ProfilePage />
+            </PrivateRoute>
+          } />
+          <Route path="/verification" element={
+            <PrivateRoute>
+              <VerificationPage />
             </PrivateRoute>
           } />
           <Route path="/heatmap" element={<div className="p-8"><h1 className="text-3xl font-bold">Comprehensive Heatmap Coming Soon</h1></div>} />

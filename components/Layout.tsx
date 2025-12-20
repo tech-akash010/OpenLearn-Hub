@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Home, 
-  Search, 
-  Cloud, 
-  Award, 
-  BookOpen, 
+import {
+  Home,
+  Search,
+  Cloud,
+  Award,
+  BookOpen,
   Settings,
   Bell,
   Menu,
@@ -21,11 +21,10 @@ import { User } from '../types';
 const NavItem: React.FC<{ to: string; icon: React.ReactNode; label: string; active: boolean }> = ({ to, icon, label, active }) => (
   <Link
     to={to}
-    className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${
-      active 
-        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
+    className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${active
+        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
         : 'text-gray-600 hover:bg-gray-100'
-    }`}
+      }`}
   >
     {icon}
     <span className="font-medium">{label}</span>
@@ -51,7 +50,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     navigate('/login');
   };
 
-  if (location.pathname === '/login') return <>{children}</>;
+  if (location.pathname === '/login' || location.pathname === '/signup') return <>{children}</>;
 
   return (
     <div className="min-h-screen flex bg-gray-50 overflow-hidden">
@@ -93,13 +92,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
-          
+
           <div className="flex-1 max-w-lg hidden md:block">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search subjects, topics or personal notes..." 
+              <input
+                type="text"
+                placeholder="Search subjects, topics or personal notes..."
                 className="w-full pl-10 pr-4 py-2 bg-gray-100 border-transparent focus:bg-white focus:border-blue-500 rounded-full text-sm transition-all focus:ring-4 focus:ring-blue-100"
               />
             </div>
@@ -110,9 +109,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               <Bell size={20} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
-            
+
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white hover:scale-105 transition-transform"
               >
@@ -127,21 +126,21 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                       <p className="text-sm font-black text-gray-900">{user?.name}</p>
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{user?.role}</p>
                     </div>
-                    <Link 
-                      to="/profile" 
+                    <Link
+                      to="/profile"
                       className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                       onClick={() => setUserMenuOpen(false)}
                     >
                       <UserIcon size={16} /> <span>View Profile</span>
                     </Link>
-                    <Link 
-                      to="/settings" 
+                    <Link
+                      to="/settings"
                       className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                       onClick={() => setUserMenuOpen(false)}
                     >
                       <Settings size={16} /> <span>Settings</span>
                     </Link>
-                    <button 
+                    <button
                       onClick={handleLogout}
                       className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-50 mt-2"
                     >
@@ -163,7 +162,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
       {/* Mobile Overlay */}
       {mobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />

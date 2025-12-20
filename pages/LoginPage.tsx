@@ -19,10 +19,10 @@ export const LoginPage: React.FC = () => {
     }
     setError('');
     setIsLoading(true);
-    
+
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     authService.login(email);
     setIsLoading(false);
     navigate('/');
@@ -130,7 +130,7 @@ export const LoginPage: React.FC = () => {
 
           <div className="bg-gray-50 p-8 border-t border-gray-100 text-center">
             <p className="text-gray-500 font-medium">
-              Don't have an account? <button className="text-blue-600 font-black hover:underline">Join the Community</button>
+              Don't have an account? <button onClick={() => navigate('/signup')} className="text-blue-600 font-black hover:underline">Join the Community</button>
             </p>
           </div>
         </div>

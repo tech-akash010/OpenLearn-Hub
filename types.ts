@@ -10,15 +10,46 @@ export enum DriveSource {
   Downloaded = 'Downloaded'
 }
 
+// Authentication & Verification Types
+export type UserRole = 'student' | 'teacher' | 'online_educator';
+export type VerificationStatus = 'verified' | 'pending' | 'rejected' | 'unverified';
+export type VerificationLevel = 'basic' | 'medium' | 'strong';
+
+export interface UploadedDocument {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  uploadedAt: string;
+}
+
+export interface VerificationData {
+  institutionName?: string;
+  department?: string;
+  year?: string;
+  studentId?: string;
+  proofDocuments?: UploadedDocument[];
+  credibilityLinks?: string[];
+  submittedAt?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   avatar?: string;
-  role: 'Student' | 'Educator' | 'Contributor';
+  role: UserRole;
+  verificationStatus: VerificationStatus;
+  verificationLevel: VerificationLevel;
+  verificationData?: VerificationData;
   joinedDate: string;
   reputation: number;
   badges: string[];
+  // Legacy support
+  legacyRole?: 'Student' | 'Educator' | 'Contributor';
 }
 
 export interface Subject {
