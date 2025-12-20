@@ -1,93 +1,170 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Cpu, Layers, Globe, ChevronRight, Star, ArrowUp } from 'lucide-react';
-import { INITIAL_SUBJECTS, INITIAL_TOPICS } from '../constants';
+import { 
+  Cpu, 
+  Layers, 
+  Globe, 
+  ChevronRight, 
+  Plus, 
+  BookOpen, 
+  Users, 
+  Search,
+  Sparkles,
+  ArrowUpRight,
+  TrendingUp
+} from 'lucide-react';
+import { INITIAL_SUBJECTS } from '../constants';
+import { UploadWizard } from '../components/UploadWizard';
 
 export const HubExplorer: React.FC = () => {
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Learning Resource Hub</h1>
-          <p className="text-gray-500 mt-1">High-quality, peer-reviewed learning materials curated by the community.</p>
-        </div>
-        <button className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center whitespace-nowrap self-start">
-          <ArrowUp size={18} className="mr-2" /> Contribute New Topic
-        </button>
-      </header>
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-      {/* Subjects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {INITIAL_SUBJECTS.map((subject) => (
-          <div key={subject.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                {subject.icon === 'Cpu' ? <Cpu /> : subject.icon === 'Layers' ? <Layers /> : <Globe />}
-              </div>
-              <span className="text-xs font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded uppercase">
-                {subject.topics.length} Topics
-              </span>
+  const filteredSubjects = INITIAL_SUBJECTS.filter(s => 
+    s.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-12 animate-in fade-in duration-700 pb-20">
+      {/* Dynamic Header */}
+      <section className="relative overflow-hidden bg-white px-8 py-12 md:px-16 md:py-20 rounded-[3rem] border border-gray-100 shadow-sm group">
+        <div className="relative z-10 max-w-4xl">
+          <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black mb-8 uppercase tracking-widest border border-blue-100">
+            <Sparkles size={14} />
+            <span>Academic Infrastructure 2.0</span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-black text-gray-900 tracking-tight leading-[1.1] mb-6">
+            Explore the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Universal Curriculum</span>.
+          </h1>
+          <p className="text-xl text-gray-500 mb-10 leading-relaxed font-medium">
+            A strictly organized, community-verified library of knowledge. Drill down from broad Subjects into granular Subtopics.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input 
+                type="text"
+                placeholder="Search the global hierarchy..."
+                className="w-full pl-14 pr-6 py-5 bg-gray-50 border-none rounded-[2rem] focus:ring-4 focus:ring-blue-100 transition-all outline-none text-lg font-medium"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">{subject.name}</h3>
-            <p className="text-sm text-gray-500 mt-1">Curated notes, diagrams, and revision guides.</p>
-            <div className="mt-6 space-y-2">
-              {INITIAL_TOPICS.filter(t => t.subjectId === subject.id).map(topic => (
-                <Link 
-                  key={topic.id} 
-                  to={`/hub/topic/${topic.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 border border-transparent hover:border-gray-200 transition-all"
-                >
-                  <span className="truncate pr-4">{topic.title.split(' - ')[1]}</span>
-                  <ChevronRight size={16} className="text-gray-400" />
-                </Link>
-              ))}
+            <button 
+              onClick={() => setIsUploadOpen(true)}
+              className="bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all flex items-center justify-center whitespace-nowrap"
+            >
+              <Plus size={24} className="mr-2" /> Start Contribution
+            </button>
+          </div>
+        </div>
+        
+        {/* Abstract Pattern */}
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-blue-50/50 to-transparent pointer-events-none"></div>
+        <div className="absolute -right-24 -top-24 w-96 h-96 bg-indigo-50/50 rounded-full blur-3xl group-hover:bg-blue-50/80 transition-colors"></div>
+      </section>
+
+      {/* Stats Quick-Bar */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+        {[
+          { label: 'Total Subjects', value: '18', icon: <Layers size={18} /> },
+          { label: 'Active Learners', value: '42.5k', icon: <Users size={18} /> },
+          { label: 'Verified Topics', value: '1,240', icon: <BookOpen size={18} /> },
+          { label: 'Community Syncs', value: '180k', icon: <TrendingUp size={18} /> },
+        ].map((stat, i) => (
+          <div key={i} className="flex items-center space-x-4 p-5 bg-white rounded-3xl border border-gray-100">
+            <div className="p-3 bg-gray-50 text-gray-400 rounded-2xl">{stat.icon}</div>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</p>
+              <p className="text-xl font-black text-gray-900">{stat.value}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Trending Topics */}
-      <section>
-        <h2 className="text-xl font-bold mb-4 flex items-center">
-          <Star size={20} className="mr-2 text-yellow-500" /> Trending This Week
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {INITIAL_TOPICS.map(topic => (
-            <Link 
-              key={topic.id}
-              to={`/hub/topic/${topic.id}`}
-              className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase">
-                    {topic.subjectId.toUpperCase()}
-                  </span>
-                  <span className="text-xs text-gray-400 font-medium">Updated 2d ago</span>
+      {/* Subjects Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {filteredSubjects.map((subject) => (
+          <Link 
+            key={subject.id} 
+            to={`/hub/subject/${subject.id}`}
+            className="group bg-white rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:border-blue-200 transition-all duration-500 flex flex-col overflow-hidden"
+          >
+            <div className="p-10">
+              <div className="flex items-center justify-between mb-10">
+                <div className={`p-5 rounded-[1.5rem] transition-all duration-500 ${
+                  subject.icon === 'Cpu' ? 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600' : 
+                  subject.icon === 'Layers' ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-600' : 
+                  'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600'
+                } group-hover:text-white group-hover:rotate-6 shadow-sm`}>
+                  {subject.icon === 'Cpu' ? <Cpu size={40} /> : subject.icon === 'Layers' ? <Layers size={40} /> : <Globe size={40} />}
                 </div>
-                <h4 className="font-bold text-gray-900 leading-tight">{topic.title}</h4>
-                <div className="flex items-center mt-4 space-x-2">
-                  <div className="flex -space-x-2 overflow-hidden">
-                    {topic.contributors.map((c, i) => (
-                      <div key={i} className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-gray-200 flex items-center justify-center text-[8px] font-bold">
-                        {c.charAt(5).toUpperCase()}
-                      </div>
-                    ))}
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter mb-1">Curriculum Depth</span>
+                  <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden border border-gray-50">
+                    <div className="h-full bg-blue-500 w-3/4 rounded-full"></div>
                   </div>
-                  <span className="text-[10px] text-gray-500">{topic.contributors.length} contributors</span>
                 </div>
               </div>
-              <div className="mt-6 flex items-center justify-between">
-                <div className="flex items-center text-xs font-semibold text-gray-600">
-                  <span className="bg-green-50 text-green-700 px-2 py-1 rounded-md mr-2">{topic.readiness}% Ready</span>
-                  <span className="text-gray-400 font-normal">Difficulty: {topic.difficulty}</span>
+              
+              <h3 className="text-3xl font-black text-gray-900 mb-4 group-hover:text-blue-600 transition-colors tracking-tight">
+                {subject.name}
+              </h3>
+              <p className="text-gray-500 font-medium leading-relaxed mb-8 h-12 line-clamp-2">
+                {subject.description}
+              </p>
+
+              <div className="flex items-center space-x-6">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Topics</span>
+                  <span className="text-lg font-black text-gray-900">24</span>
+                </div>
+                <div className="w-px h-8 bg-gray-100"></div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Experts</span>
+                  <span className="text-lg font-black text-gray-900">142</span>
                 </div>
               </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+            </div>
+
+            <div className="mt-auto p-8 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between group-hover:bg-blue-50/50 transition-colors">
+              <span className="text-xs font-black text-gray-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">
+                Drill Down Hierarchy
+              </span>
+              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                <ChevronRight size={24} />
+              </div>
+            </div>
+          </Link>
+        ))}
+
+        {/* Propose Card */}
+        <button 
+          onClick={() => setIsUploadOpen(true)}
+          className="group bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-200 p-10 flex flex-col items-center justify-center text-center hover:bg-white hover:border-blue-400 transition-all duration-300 min-h-[420px]"
+        >
+          <div className="w-20 h-20 rounded-full bg-white border border-gray-100 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+            <Plus size={36} />
+          </div>
+          <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Missing a Subject?</h3>
+          <p className="text-gray-500 font-medium max-w-[240px] mb-8 leading-relaxed text-sm">Help expand the hub by proposing a new top-level field of study.</p>
+          <div className="text-blue-600 font-black text-xs uppercase tracking-widest flex items-center">
+            Propose Now <ArrowUpRight size={14} className="ml-2" />
+          </div>
+        </button>
+      </div>
+
+      {isUploadOpen && (
+        <UploadWizard 
+          onClose={() => setIsUploadOpen(false)} 
+          onComplete={(data) => {
+            console.log('Hierarchy upload initiated:', data);
+            setIsUploadOpen(false);
+          }} 
+        />
+      )}
     </div>
   );
 };

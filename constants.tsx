@@ -1,37 +1,57 @@
 
-import React from 'react';
-import { BookOpen, Cpu, Database, Globe, Layers, Terminal } from 'lucide-react';
-import { Subject, Topic, Difficulty } from './types';
+import { Subject, Topic, Subtopic, ContentItem, Difficulty } from './types';
 
 export const INITIAL_SUBJECTS: Subject[] = [
-  { id: 'cs', name: 'Computer Science', icon: 'Cpu', topics: ['os', 'dsa', 'dbms'] },
-  { id: 'math', name: 'Mathematics', icon: 'Layers', topics: ['calc', 'la'] },
-  { id: 'bio', name: 'Biology', icon: 'Globe', topics: ['cell', 'gen'] },
+  { id: 'cs', name: 'Computer Science', icon: 'Cpu', description: 'Foundations of computation, software engineering, and artificial intelligence.', status: 'verified' },
+  { id: 'math', name: 'Mathematics', icon: 'Layers', description: 'Pure and applied mathematics from Calculus to Abstract Algebra.', status: 'verified' },
+  { id: 'bio', name: 'Biology', icon: 'Globe', description: 'The study of life, molecular structures, and ecological systems.', status: 'verified' },
 ];
 
 export const INITIAL_TOPICS: Topic[] = [
-  {
-    id: 'os',
-    subjectId: 'cs',
-    title: 'Operating Systems - Process Scheduling',
-    content: `## What is Process Scheduling?\nProcess scheduling is the activity of the process manager that handles the removal of the running process from the CPU and the selection of another process on the basis of a particular strategy.\n\n### Types of Schedulers\n1. **Long Term Scheduler**: Job Scheduler\n2. **Short Term Scheduler**: CPU Scheduler\n3. **Medium Term Scheduler**: Process swapping scheduler\n\n### Algorithms\n- FCFS (First Come First Served)\n- SJF (Shortest Job First)\n- Round Robin\n- Priority Scheduling`,
+  { 
+    id: 'os', 
+    subjectId: 'cs', 
+    title: 'Operating Systems', 
+    description: 'The backbone of computer software, managing hardware and program execution.', 
+    status: 'verified',
     difficulty: Difficulty.Intermediate,
+    votes: 1240,
     lastUpdated: '2024-05-20',
-    readiness: 85,
-    contributors: ['user_1', 'user_admin'],
-    votes: 124,
-    versions: []
+    content: `## Operating Systems Fundamentals\n\nAn Operating System (OS) is software that manages computer hardware and software resources. It provides common services for computer programs.\n\n### Key Functions\n- **Memory Management**: Tracking every memory location.\n- **Process Management**: Handling multiple concurrent tasks.\n- **File System**: Organizing data storage.\n- **I/O Management**: Communication with peripherals.`,
+    readiness: 92
   },
-  {
-    id: 'dsa',
-    subjectId: 'cs',
-    title: 'Data Structures - Graphs',
-    content: `## Graph Theory Foundations\nA Graph is a non-linear data structure consisting of nodes and edges.\n\n### Representations\n- Adjacency Matrix\n- Adjacency List`,
+  { 
+    id: 'dsa', 
+    subjectId: 'cs', 
+    title: 'Data Structures', 
+    description: 'Efficient ways to organize and store data for algorithmic processing.', 
+    status: 'verified',
     difficulty: Difficulty.Advanced,
-    lastUpdated: '2024-05-18',
-    readiness: 45,
-    contributors: ['user_2'],
-    votes: 89,
-    versions: []
+    votes: 2150,
+    lastUpdated: '2024-06-10',
+    content: `## Data Structures Overview\n\nData structures are essential for managing large amounts of data efficiently. They are used in almost every program or software system.\n\n### Types of Data Structures\n- Linear: Arrays, Linked Lists, Stacks, Queues\n- Non-Linear: Trees, Graphs`,
+    readiness: 78
+  },
+];
+
+export const INITIAL_SUBTOPICS: Subtopic[] = [
+  { id: 'scheduling', topicId: 'os', title: 'Process Scheduling', description: 'Strategies used by the OS to allocate CPU time to active processes.', status: 'verified' },
+  { id: 'memory', topicId: 'os', title: 'Memory Management', description: 'Mapping logical addresses to physical memory and handling swapping.', status: 'verified' },
+  { id: 'graphs', topicId: 'dsa', title: 'Graph Theory', description: 'Studying nodes and edges to model network structures.', status: 'verified' },
+];
+
+export const INITIAL_CONTENT: ContentItem[] = [
+  {
+    id: 'c1',
+    subtopicId: 'scheduling',
+    topicId: 'os',
+    subjectId: 'cs',
+    title: 'Deep Dive: Scheduling Algorithms',
+    body: `## Core Scheduling Strategies\n\n### 1. FCFS (First Come First Served)\nThe simplest non-preemptive algorithm. While fair in order, it often leads to the "convoy effect" where short processes wait behind long ones.\n\n### 2. SJF (Shortest Job First)\nOptimal for minimizing average wait time. However, it requires knowing CPU burst times in advance, which is rarely possible.\n\n### 3. Round Robin (RR)\nThe standard for time-sharing systems. It uses a fixed "Time Quantum" to ensure no process starves.`,
+    author: 'pro_coder_99',
+    votes: 850,
+    readiness: 95,
+    lastUpdated: '2024-05-20',
+    difficulty: Difficulty.Intermediate
   }
 ];

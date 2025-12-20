@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
   Search, 
@@ -11,8 +11,12 @@ import {
   Bell,
   Menu,
   X,
-  PieChart
+  PieChart,
+  User as UserIcon,
+  LogOut
 } from 'lucide-react';
+import { authService } from '../services/authService';
+import { User } from '../types';
 
 const NavItem: React.FC<{ to: string; icon: React.ReactNode; label: string; active: boolean }> = ({ to, icon, label, active }) => (
   <Link
@@ -30,7 +34,24 @@ const NavItem: React.FC<{ to: string; icon: React.ReactNode; label: string; acti
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [user, setUser] = useState<User | null>(authService.getUser());
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleAuth = () => setUser(authService.getUser());
+    window.addEventListener('auth-change', handleAuth);
+    return () => window.removeEventListener('auth-change', handleAuth);
+  }, []);
+
+  const handleLogout = () => {
+    authService.logout();
+    setUserMenuOpen(false);
+    navigate('/login');
+  };
+
+  if (location.pathname === '/login') return <>{children}</>;
 
   return (
     <div className="min-h-screen flex bg-gray-50 overflow-hidden">
@@ -58,6 +79,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </nav>
 
           <div className="p-4 border-t border-gray-100">
+            <NavItem to="/profile" icon={<UserIcon size={20} />} label="Profile" active={location.pathname === '/profile'} />
             <NavItem to="/settings" icon={<Settings size={20} />} label="Settings" active={location.pathname === '/settings'} />
           </div>
         </div>
@@ -88,8 +110,46 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               <Bell size={20} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">
-              JD
+            
+            <div className="relative">
+              <button 
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white hover:scale-105 transition-transform"
+              >
+                {user?.avatar || user?.name.charAt(0) || 'U'}
+              </button>
+
+              {userMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setUserMenuOpen(false)} />
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 z-20 py-2 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="px-4 py-3 border-b border-gray-50 mb-2">
+                      <p className="text-sm font-black text-gray-900">{user?.name}</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{user?.role}</p>
+                    </div>
+                    <Link 
+                      to="/profile" 
+                      className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <UserIcon size={16} /> <span>View Profile</span>
+                    </Link>
+                    <Link 
+                      to="/settings" 
+                      className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <Settings size={16} /> <span>Settings</span>
+                    </Link>
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-50 mt-2"
+                    >
+                      <LogOut size={16} /> <span>Sign Out</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>

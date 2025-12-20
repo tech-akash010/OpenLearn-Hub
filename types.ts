@@ -5,51 +5,79 @@ export enum Difficulty {
   Advanced = 'Advanced'
 }
 
-export interface Contributor {
+export enum DriveSource {
+  Uploaded = 'Uploaded',
+  Downloaded = 'Downloaded'
+}
+
+export interface User {
   id: string;
   name: string;
+  email: string;
+  avatar?: string;
+  role: 'Student' | 'Educator' | 'Contributor';
+  joinedDate: string;
   reputation: number;
-  badge?: 'Educator' | 'Reviewer' | 'Elite';
-  streak: number;
-}
-
-export interface Version {
-  id: string;
-  author: string;
-  timestamp: string;
-  summary: string;
-  content: string;
-}
-
-export interface Topic {
-  id: string;
-  title: string;
-  subjectId: string;
-  content: string;
-  difficulty: Difficulty;
-  lastUpdated: string;
-  readiness: number; // 0-100
-  contributors: string[];
-  votes: number;
-  versions: Version[];
+  badges: string[];
 }
 
 export interface Subject {
   id: string;
   name: string;
   icon: string;
-  topics: string[];
+  description: string;
+  status: 'verified' | 'pending';
 }
 
-export interface DriveNote {
+export interface Topic {
+  id: string;
+  subjectId: string;
+  title: string;
+  description: string;
+  status: 'verified' | 'pending';
+  difficulty: Difficulty;
+  votes: number;
+  lastUpdated: string;
+  content: string;
+  readiness: number;
+}
+
+export interface Subtopic {
+  id: string;
+  topicId: string;
+  title: string;
+  description: string;
+  status: 'verified' | 'pending';
+}
+
+export interface DriveItem {
   id: string;
   name: string;
+  subjectId: string;
+  topicId: string;
+  subtopicId: string;
+  subjectName: string;
+  topicName: string;
+  subtopicName: string;
+  title: string;
+  source: DriveSource;
+  timestamp: string;
   mimeType: string;
-  thumbnail?: string;
-  linkedTopicId?: string;
-  aiClassification?: string;
-  lastModified: string;
-  content?: string;
+  size?: string;
+}
+
+export interface ContentItem {
+  id: string;
+  subtopicId: string;
+  topicId: string;
+  subjectId: string;
+  title: string;
+  body: string;
+  author: string;
+  votes: number;
+  readiness: number;
+  lastUpdated: string;
+  difficulty: Difficulty;
 }
 
 export interface UserStats {
