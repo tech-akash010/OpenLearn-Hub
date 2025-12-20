@@ -117,3 +117,14 @@ export interface UserStats {
   studentsHelped: number;
   currentStreak: number;
 }
+
+export interface ChatMessage {
+  role: 'user' | 'model' | 'system';
+  parts: { text: string }[];
+}
+
+export interface ChatContext {
+  subject?: string;
+  topic?: string;
+  subtopic?: string;
+}

@@ -10,7 +10,8 @@ import {
   Image as ImageIcon, 
   Type as TextIcon,
   Trash2,
-  UploadCloud
+  UploadCloud,
+  FileText
 } from 'lucide-react';
 import { INITIAL_SUBJECTS, INITIAL_TOPICS, INITIAL_SUBTOPICS } from '../constants';
 import { Difficulty } from '../types';
@@ -23,6 +24,7 @@ interface UploadWizardProps {
 
 export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
   const [selection, setSelection] = useState({
     subject: '',
@@ -35,7 +37,8 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
     isNewTopic: false,
     isNewSubtopic: false,
     newName: '',
-    attachedImage: null as string | null
+    attachedImage: null as string | null,
+    attachedPdf: null as { name: string; data: string } | null
   });
 
   const [filteredTopics, setFilteredTopics] = useState(INITIAL_TOPICS);
@@ -69,16 +72,38 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
     }
   };
 
+  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelection(prev => ({ 
+          ...prev, 
+          attachedPdf: { 
+            name: file.name, 
+            data: reader.result as string 
+          } 
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const removeImage = () => {
     setSelection(prev => ({ ...prev, attachedImage: null }));
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removePdf = () => {
+    setSelection(prev => ({ ...prev, attachedPdf: null }));
+    if (pdfInputRef.current) pdfInputRef.current.value = '';
   };
 
   const canProgress = () => {
     if (step === 1) return selection.subject !== '' || (selection.isNewSubject && selection.newName);
     if (step === 2) return selection.topic !== '' || (selection.isNewTopic && selection.newName);
     if (step === 3) return selection.subtopic !== '' || (selection.isNewSubtopic && selection.newName);
-    if (step === 4) return selection.title && (selection.content || selection.attachedImage);
+    if (step === 4) return selection.title && (selection.content || selection.attachedImage || selection.attachedPdf);
     return false;
   };
 
@@ -99,9 +124,9 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-3xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
         {/* Header */}
-        <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+        <div className="px-10 py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div>
             <h2 className="text-2xl font-black text-gray-900">Academic Contribution</h2>
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Multi-modal knowledge sync</p>
@@ -245,14 +270,14 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   {/* Writing Area */}
-                  <div className="space-y-3">
+                  <div className="lg:col-span-7 space-y-3">
                     <label className="flex items-center text-xs font-black text-blue-600 uppercase tracking-widest">
                       <TextIcon size={14} className="mr-2" /> Comprehensive Explanation
                     </label>
                     <textarea
-                      rows={10}
+                      rows={12}
                       className="w-full px-6 py-5 rounded-3xl bg-gray-900 text-white border-none focus:ring-4 focus:ring-blue-200 outline-none font-medium text-sm leading-relaxed placeholder:text-gray-500"
                       placeholder="Explain the core concepts in detail..."
                       value={selection.content}
@@ -260,47 +285,84 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                     />
                   </div>
 
-                  {/* Photo Area */}
-                  <div className="space-y-3">
-                    <label className="flex items-center text-xs font-black text-indigo-600 uppercase tracking-widest">
-                      <ImageIcon size={14} className="mr-2" /> Visual Aids & Diagrams
-                    </label>
-                    
-                    {!selection.attachedImage ? (
-                      <div 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="group relative h-[256px] border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all overflow-hidden"
-                      >
-                        <input 
-                          type="file" 
-                          ref={fileInputRef} 
-                          className="hidden" 
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                        />
-                        <div className="p-4 bg-white rounded-2xl shadow-sm text-gray-400 group-hover:scale-110 group-hover:text-indigo-600 transition-all">
-                          <UploadCloud size={32} />
+                  {/* Attachment Column */}
+                  <div className="lg:col-span-5 space-y-6">
+                    {/* Photo Area */}
+                    <div className="space-y-3">
+                      <label className="flex items-center text-xs font-black text-indigo-600 uppercase tracking-widest">
+                        <ImageIcon size={14} className="mr-2" /> Visual Aids
+                      </label>
+                      
+                      {!selection.attachedImage ? (
+                        <div 
+                          onClick={() => fileInputRef.current?.click()}
+                          className="group relative h-40 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all overflow-hidden"
+                        >
+                          <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                          />
+                          <UploadCloud size={24} className="text-gray-400 group-hover:text-indigo-600 group-hover:scale-110 transition-all" />
+                          <p className="mt-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Image (JPG, PNG)</p>
                         </div>
-                        <p className="mt-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Click or Drag Image</p>
-                        <p className="mt-1 text-[10px] text-gray-400">JPG, PNG, SVG supported</p>
-                      </div>
-                    ) : (
-                      <div className="relative h-[256px] rounded-[2rem] overflow-hidden group shadow-md">
-                        <img 
-                          src={selection.attachedImage} 
-                          alt="Preview" 
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <button 
-                            onClick={removeImage}
-                            className="p-4 bg-red-600 text-white rounded-2xl hover:scale-110 transition-transform shadow-xl"
-                          >
-                            <Trash2 size={24} />
-                          </button>
+                      ) : (
+                        <div className="relative h-40 rounded-[2rem] overflow-hidden group shadow-md border border-gray-100">
+                          <img 
+                            src={selection.attachedImage} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button 
+                              onClick={removeImage}
+                              className="p-3 bg-red-600 text-white rounded-xl hover:scale-110 transition-transform shadow-xl"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+
+                    {/* PDF Area */}
+                    <div className="space-y-3">
+                      <label className="flex items-center text-xs font-black text-emerald-600 uppercase tracking-widest">
+                        <FileText size={14} className="mr-2" /> Document Attachment (PDF)
+                      </label>
+                      
+                      {!selection.attachedPdf ? (
+                        <div 
+                          onClick={() => pdfInputRef.current?.click()}
+                          className="group relative h-40 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-all overflow-hidden"
+                        >
+                          <input 
+                            type="file" 
+                            ref={pdfInputRef} 
+                            className="hidden" 
+                            accept="application/pdf"
+                            onChange={handlePdfUpload}
+                          />
+                          <UploadCloud size={24} className="text-gray-400 group-hover:text-emerald-600 group-hover:scale-110 transition-all" />
+                          <p className="mt-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">PDF DOCUMENT</p>
+                        </div>
+                      ) : (
+                        <div className="relative h-40 rounded-[2rem] overflow-hidden group shadow-md bg-emerald-50 border border-emerald-100 flex flex-col items-center justify-center p-6 text-center">
+                          <FileText size={40} className="text-emerald-600 mb-2" />
+                          <p className="text-xs font-bold text-emerald-900 truncate w-full px-4">{selection.attachedPdf.name}</p>
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button 
+                              onClick={removePdf}
+                              className="p-3 bg-red-600 text-white rounded-xl hover:scale-110 transition-transform shadow-xl"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -310,7 +372,7 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                   </div>
                   <div>
                     <h5 className="font-bold text-blue-900 text-sm">Cross-Device Synchronization</h5>
-                    <p className="text-blue-700/70 text-xs">Text and visual media will be bundled and synced to your personal cloud vault.</p>
+                    <p className="text-blue-700/70 text-xs">Writing, visuals, and PDF documents will be bundled into your personal vault.</p>
                   </div>
                 </div>
               </div>

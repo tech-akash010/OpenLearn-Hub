@@ -13,7 +13,8 @@ import {
   X,
   PieChart,
   User as UserIcon,
-  LogOut
+  LogOut,
+  Sparkles
 } from 'lucide-react';
 import { authService } from '../services/authService';
 import { User } from '../types';
@@ -72,6 +73,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
             <NavItem to="/" icon={<Home size={20} />} label="Dashboard" active={location.pathname === '/'} />
             <NavItem to="/hub" icon={<BookOpen size={20} />} label="Learning Hub" active={location.pathname.startsWith('/hub')} />
+            <NavItem to="/ai-assistant" icon={<Sparkles size={20} />} label="AI Assistant" active={location.pathname === '/ai-assistant'} />
             <NavItem to="/drive" icon={<Cloud size={20} />} label="Drive Organizer" active={location.pathname === '/drive'} />
             <NavItem to="/heatmap" icon={<PieChart size={20} />} label="Topic Heatmap" active={location.pathname === '/heatmap'} />
             <NavItem to="/leaderboard" icon={<Award size={20} />} label="Contributors" active={location.pathname === '/leaderboard'} />
