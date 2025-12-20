@@ -1,0 +1,8 @@
+{
+  "name": "OpenLearn Hub",
+  "description": "A community-driven learning resource platform with AI-powered smart notes integration for Google Drive.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
