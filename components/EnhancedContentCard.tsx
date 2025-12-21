@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, GraduationCap, Youtube, Eye, Heart, User } from 'lucide-react';
+import { BookOpen, GraduationCap, Youtube, Eye, ThumbsUp, MessageSquare, Star } from 'lucide-react';
 import { DemoContent } from '../data/demoContents';
 
 interface EnhancedContentCardProps {
@@ -13,6 +13,11 @@ export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
 }) => {
     const { title, description, organization, uploadedBy, views, likes } = content;
     const { subjectPath, universityPath, channelPath } = organization;
+
+    // Mock interaction stats (in production, these would come from the content object)
+    const upvotes = likes || 0;
+    const comments = Math.floor(Math.random() * 20) + 1;
+    const averageRating = 4.2 + Math.random() * 0.8; // Random rating between 4.2-5.0
 
     return (
         <div
@@ -75,18 +80,28 @@ export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <div className="flex items-center space-x-2 text-xs text-gray-500">
-                    <User size={14} />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs">
+                        {uploadedBy.charAt(0)}
+                    </div>
                     <span className="font-medium">{uploadedBy}</span>
                 </div>
 
                 <div className="flex items-center space-x-4 text-xs text-gray-500">
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 hover:text-blue-600 transition-colors cursor-pointer">
                         <Eye size={14} />
                         <span className="font-medium">{views.toLocaleString()}</span>
                     </div>
+                    <div className="flex items-center space-x-1 hover:text-blue-600 transition-colors cursor-pointer">
+                        <ThumbsUp size={14} />
+                        <span className="font-medium">{upvotes}</span>
+                    </div>
+                    <div className="flex items-center space-x-1 hover:text-blue-600 transition-colors cursor-pointer">
+                        <MessageSquare size={14} />
+                        <span className="font-medium">{comments}</span>
+                    </div>
                     <div className="flex items-center space-x-1">
-                        <Heart size={14} />
-                        <span className="font-medium">{likes}</span>
+                        <Star size={14} className="fill-amber-400 text-amber-400" />
+                        <span className="font-medium">{averageRating.toFixed(1)}</span>
                     </div>
                 </div>
             </div>

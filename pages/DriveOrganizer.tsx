@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Cloud, 
-  Search, 
-  RefreshCw, 
-  FileText, 
-  Folder, 
+import {
+  Cloud,
+  Search,
+  RefreshCw,
+  FileText,
+  Folder,
   Download,
   Upload,
   Check,
@@ -41,10 +41,10 @@ export const DriveOrganizer: React.FC = () => {
     setIsSyncing(false);
   };
 
-  const filteredItems = items.filter(item => 
+  const filteredItems = items.filter(item =>
     item.source === activeTab &&
-    (item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     item.subjectName.toLowerCase().includes(searchQuery.toLowerCase()))
+    (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.subjectName.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -59,12 +59,12 @@ export const DriveOrganizer: React.FC = () => {
           <p className="text-gray-500 mt-1">Your contributions and community downloads, organized by hierarchy.</p>
         </div>
         <div className="flex items-center space-x-3">
-          <button 
+          <button
             onClick={handleSync}
             disabled={isSyncing}
             className="bg-white border-2 border-gray-100 text-gray-600 px-5 py-2.5 rounded-xl font-bold hover:bg-gray-50 transition-all flex items-center shadow-sm disabled:opacity-50"
           >
-            <RefreshCw size={18} className={`mr-2 ${isSyncing ? 'animate-spin' : ''}`} /> 
+            <RefreshCw size={18} className={`mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
             {isSyncing ? 'Syncing Vault...' : 'Refresh Vault'}
           </button>
         </div>
@@ -121,14 +121,14 @@ export const DriveOrganizer: React.FC = () => {
           <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
             <div className="p-8 border-b border-gray-100 flex flex-col sm:flex-row items-center justify-between bg-gray-50/50 gap-4">
               <div className="flex bg-gray-200/50 p-1.5 rounded-2xl w-full sm:w-auto">
-                <button 
+                <button
                   onClick={() => setActiveTab(DriveSource.Uploaded)}
                   className={`flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-2.5 text-sm font-black rounded-xl transition-all ${activeTab === DriveSource.Uploaded ? 'bg-white text-blue-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                   <Upload size={16} />
                   <span>Uploaded ({items.filter(i => i.source === DriveSource.Uploaded).length})</span>
                 </button>
-                <button 
+                <button
                   onClick={() => setActiveTab(DriveSource.Downloaded)}
                   className={`flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-2.5 text-sm font-black rounded-xl transition-all ${activeTab === DriveSource.Downloaded ? 'bg-white text-blue-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
                 >
@@ -138,9 +138,9 @@ export const DriveOrganizer: React.FC = () => {
               </div>
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                <input 
-                  type="text" 
-                  placeholder="Search vault..." 
+                <input
+                  type="text"
+                  placeholder="Search vault..."
                   className="w-full pl-10 pr-4 py-3 bg-white border border-gray-100 focus:ring-4 focus:ring-blue-100 rounded-xl text-sm transition-all outline-none"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -158,8 +158,8 @@ export const DriveOrganizer: React.FC = () => {
                     {activeTab === DriveSource.Uploaded ? 'No Contributions Yet' : 'No Community Downloads'}
                   </h3>
                   <p className="text-gray-500 max-w-sm">
-                    {activeTab === DriveSource.Uploaded 
-                      ? 'Help the community by uploading resources in the Learning Hub. They will appear here automatically.' 
+                    {activeTab === DriveSource.Uploaded
+                      ? 'Help the community by uploading resources in Start Contribution. They will appear here automatically.'
                       : 'Download verified resources from the Hub to sync them to your personal vault.'}
                   </p>
                 </div>
@@ -183,11 +183,10 @@ export const DriveOrganizer: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-3 ml-4">
-                        <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${
-                          file.source === DriveSource.Uploaded 
-                          ? 'border-emerald-100 bg-emerald-50 text-emerald-600' 
-                          : 'border-blue-100 bg-blue-50 text-blue-600'
-                        }`}>
+                        <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${file.source === DriveSource.Uploaded
+                            ? 'border-emerald-100 bg-emerald-50 text-emerald-600'
+                            : 'border-blue-100 bg-blue-50 text-blue-600'
+                          }`}>
                           {file.source}
                         </span>
                         <button className="p-2.5 text-gray-400 hover:bg-white hover:text-gray-600 rounded-xl transition-all shadow-sm">

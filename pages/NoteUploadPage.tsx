@@ -5,7 +5,8 @@ import { Upload, FileText, ArrowLeft, CheckCircle } from 'lucide-react';
 import { authService } from '../services/authService';
 import { QuizAttachment } from '../components/QuizAttachment';
 import { FileUpload } from '../components/FileUpload';
-import { Quiz, Difficulty } from '../types';
+import { WatermarkInput, WatermarkConfig } from '../components/WatermarkInput';
+import { Quiz, Difficulty, UploadedDocument } from '../types';
 
 export const NoteUploadPage: React.FC = () => {
     const navigate = useNavigate();
@@ -14,16 +15,27 @@ export const NoteUploadPage: React.FC = () => {
     const [step, setStep] = useState<'details' | 'files' | 'quiz' | 'complete'>('details');
     const [noteTitle, setNoteTitle] = useState('');
     const [noteDescription, setNoteDescription] = useState('');
+    const [noteContent, setNoteContent] = useState('');
     const [subject, setSubject] = useState('Computer Science');
     const [topic, setTopic] = useState('Operating Systems');
     const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.Intermediate);
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [uploadedFiles, setUploadedFiles] = useState<UploadedDocument[]>([]);
     const [attachedQuiz, setAttachedQuiz] = useState<Quiz | null>(null);
+    const [watermarkConfig, setWatermarkConfig] = useState<WatermarkConfig>({
+        enabled: false,
+        text: user?.name || '',
+        position: 'bottom-right',
+        opacity: 0.7
+    });
 
     if (!user) return null;
 
-    const handleFileUpload = (file: File) => {
+    const handleFileUpload = (file: UploadedDocument) => {
         setUploadedFiles([...uploadedFiles, file]);
+    };
+
+    const handleFileRemove = (fileId: string) => {
+        setUploadedFiles(uploadedFiles.filter(f => f.id !== fileId));
     };
 
     const handleQuizAttached = (quiz: Quiz) => {
@@ -39,11 +51,13 @@ export const NoteUploadPage: React.FC = () => {
         const noteData = {
             title: noteTitle,
             description: noteDescription,
+            content: noteContent,
             subject,
             topic,
             difficulty,
             files: uploadedFiles,
             quiz: attachedQuiz,
+            watermark: watermarkConfig,
             uploadedBy: user.id,
             uploadedAt: new Date().toISOString()
         };
@@ -194,26 +208,30 @@ export const NoteUploadPage: React.FC = () => {
                             </div>
                         )}
 
-                        {/* Step 2: File Upload */}
+                        {/* Step 2: File Upload & Notes */}
                         {step === 'files' && (
                             <div className="space-y-6">
-                                <h2 className="text-2xl font-black text-gray-900 mb-6">Upload Files</h2>
+                                <h2 className="text-2xl font-black text-gray-900 mb-6">Upload Content</h2>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Add your notes by typing them below, uploading PDF documents, or adding images. You can use any combination of these methods.
+                                </p>
 
-                                <FileUpload onFileSelect={handleFileUpload} />
+                                <FileUpload
+                                    onFileUpload={handleFileUpload}
+                                    onFileRemove={handleFileRemove}
+                                    uploadedFiles={uploadedFiles}
+                                    noteContent={noteContent}
+                                    onNoteChange={setNoteContent}
+                                    maxFiles={5}
+                                    label="Add Your Content"
+                                />
 
-                                {uploadedFiles.length > 0 && (
-                                    <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6">
-                                        <h3 className="font-black text-green-900 mb-3">Uploaded Files ({uploadedFiles.length})</h3>
-                                        <ul className="space-y-2">
-                                            {uploadedFiles.map((file, idx) => (
-                                                <li key={idx} className="flex items-center space-x-2 text-sm text-green-700">
-                                                    <FileText size={16} />
-                                                    <span>{file.name}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
+                                {/* Watermark Section */}
+                                <WatermarkInput
+                                    value={watermarkConfig}
+                                    onChange={setWatermarkConfig}
+                                    defaultText={user?.name || 'Your Name'}
+                                />
 
                                 <div className="flex items-center space-x-4">
                                     <button
@@ -224,7 +242,7 @@ export const NoteUploadPage: React.FC = () => {
                                     </button>
                                     <button
                                         onClick={() => setStep('quiz')}
-                                        disabled={uploadedFiles.length === 0}
+                                        disabled={uploadedFiles.length === 0 && !noteContent.trim()}
                                         className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Continue to Quiz (Optional)
@@ -286,6 +304,10 @@ export const NoteUploadPage: React.FC = () => {
                                         <div className="flex justify-between">
                                             <span className="text-gray-600">Files:</span>
                                             <span className="font-bold text-gray-900">{uploadedFiles.length}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Notes:</span>
+                                            <span className="font-bold text-gray-900">{noteContent.trim() ? `${noteContent.length} chars` : 'None'}</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-gray-600">Quiz Attached:</span>

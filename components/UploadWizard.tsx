@@ -20,6 +20,8 @@ import { authService } from '../services/authService';
 import { QuizAttachment } from './QuizAttachment';
 import { ContentSourceForm } from './ContentSourceForm';
 import { validateSourceRequirement } from '../services/contentSourceValidator';
+import { RichTextEditor } from './RichTextEditor';
+import { WatermarkInput, WatermarkConfig } from './WatermarkInput';
 
 interface UploadWizardProps {
   onClose: () => void;
@@ -44,7 +46,13 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
     attachedImage: null as string | null,
     attachedPdf: null as { name: string; data: string } | null,
     attachedQuiz: null as Quiz | null,
-    sourceMetadata: null as ContentSourceMetadata | null
+    sourceMetadata: null as ContentSourceMetadata | null,
+    watermarkConfig: {
+      enabled: false,
+      text: authService.getUser()?.name || '',
+      position: 'bottom-right' as const,
+      opacity: 0.7
+    }
   });
 
   const [filteredTopics, setFilteredTopics] = useState(INITIAL_TOPICS);
@@ -288,14 +296,12 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                   {/* Writing Area */}
                   <div className="lg:col-span-7 space-y-3">
                     <label className="flex items-center text-xs font-black text-blue-600 uppercase tracking-widest">
-                      <TextIcon size={14} className="mr-2" /> Comprehensive Explanation
+                      <TextIcon size={14} className="mr-2" /> Comprehensive Explanation (MS Word-like Editor)
                     </label>
-                    <textarea
-                      rows={12}
-                      className="w-full px-6 py-5 rounded-3xl bg-gray-900 text-white border-none focus:ring-4 focus:ring-blue-200 outline-none font-medium text-sm leading-relaxed placeholder:text-gray-500"
-                      placeholder="Explain the core concepts in detail..."
+                    <RichTextEditor
                       value={selection.content}
-                      onChange={e => setSelection({ ...selection, content: e.target.value })}
+                      onChange={(html) => setSelection({ ...selection, content: html })}
+                      placeholder="Explain the core concepts in detail... Use the toolbar to format your text with headings, lists, and more."
                     />
                   </div>
 
@@ -389,6 +395,13 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                     <p className="text-blue-700/70 text-xs">Writing, visuals, and PDF documents will be bundled into your personal vault.</p>
                   </div>
                 </div>
+
+                {/* Watermark Section */}
+                <WatermarkInput
+                  value={selection.watermarkConfig}
+                  onChange={(config) => setSelection({ ...selection, watermarkConfig: config })}
+                  defaultText={authService.getUser()?.name || 'Your Name'}
+                />
               </div>
             </div>
           )}

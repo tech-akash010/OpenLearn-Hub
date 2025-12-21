@@ -238,7 +238,7 @@ export const QuizCreationPage: React.FC = () => {
                                                 onClick={() => navigate('/hub')}
                                                 className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all"
                                             >
-                                                Go to Learning Hub
+                                                Go to Start Contribution
                                             </button>
                                         </div>
                                     ) : (

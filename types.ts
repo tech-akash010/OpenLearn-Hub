@@ -306,3 +306,41 @@ export interface ChatContext {
   topic?: string;
   subtopic?: string;
 }
+
+// Viewer Interaction Types
+export interface Comment {
+  id: string;
+  contentId: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  text: string;
+  createdAt: string;
+  upvotes: number;
+  replies?: Comment[];
+}
+
+export interface Review {
+  id: string;
+  contentId: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  rating: number; // 1-5 stars
+  title: string;
+  text: string;
+  helpful: number;
+  notHelpful: number;
+  createdAt: string;
+}
+
+export interface ContentInteraction {
+  contentId: string;
+  userVote: 'up' | 'down' | null;
+  upvotes: number;
+  downvotes: number;
+  comments: Comment[];
+  reviews: Review[];
+  averageRating: number;
+  totalReviews: number;
+}

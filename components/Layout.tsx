@@ -74,7 +74,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
           <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
             <NavItem to="/" icon={<Home size={20} />} label="Dashboard" active={location.pathname === '/'} />
-            <NavItem to="/hub" icon={<BookOpen size={20} />} label="Learning Hub" active={location.pathname.startsWith('/hub')} />
+            <NavItem to="/hub" icon={<BookOpen size={20} />} label="Start Contribution" active={location.pathname.startsWith('/hub')} />
             <NavItem to="/browse" icon={<Compass size={20} />} label="Browse Paths" active={location.pathname === '/browse'} />
             <NavItem to="/quiz/create" icon={<FileQuestion size={20} />} label="Create Quiz" active={location.pathname === '/quiz/create'} />
             <NavItem to="/ai-assistant" icon={<Sparkles size={20} />} label="AI Assistant" active={location.pathname === '/ai-assistant'} />
