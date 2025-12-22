@@ -3,13 +3,19 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { INITIAL_SUBJECTS, INITIAL_TOPICS, INITIAL_SUBTOPICS } from '../constants';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { ChevronRight, FileText, Plus, CheckCircle2, Bookmark, ArrowRight, Sparkles } from 'lucide-react';
+import { ChevronRight, FileText, Plus, CheckCircle2, Bookmark, ArrowRight, Sparkles, Lock, Info } from 'lucide-react';
+import { authService } from '../services/authService';
 
 export const SubtopicExplorer: React.FC = () => {
   const { subjectId, topicId } = useParams<{ subjectId: string, topicId: string }>();
   const subject = INITIAL_SUBJECTS.find(s => s.id === subjectId);
   const topic = INITIAL_TOPICS.find(t => t.id === topicId);
   const subtopics = INITIAL_SUBTOPICS.filter(st => st.topicId === topicId);
+  const user = authService.getUser();
+
+  // Check if user can contribute
+  const canContribute = user ? authService.canUploadNotes(user) : true;
+  const isBronze = user?.role === 'community_contributor' && user?.communityMetrics?.trustLevel === 'bronze';
 
   if (!subject || !topic) return <div>Topic not found</div>;
 
@@ -20,7 +26,7 @@ export const SubtopicExplorer: React.FC = () => {
         { label: subject.name, path: `/hub/subject/${subject.id}` },
         { label: topic.title, path: `/hub/subject/${subject.id}/topic/${topic.id}` }
       ]} />
-      
+
       <div className="mb-12">
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-100">
@@ -44,7 +50,7 @@ export const SubtopicExplorer: React.FC = () => {
             <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.07] group-hover:scale-125 transition-all text-indigo-600">
               <CheckCircle2 size={120} />
             </div>
-            
+
             <div className="flex items-start justify-between mb-6">
               <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
                 <FileText size={22} />
@@ -73,13 +79,38 @@ export const SubtopicExplorer: React.FC = () => {
           </Link>
         ))}
 
-        <button className="group bg-gray-50/50 rounded-[2rem] border-2 border-dashed border-gray-200 p-6 flex flex-col items-center justify-center text-center hover:bg-white hover:border-indigo-300 transition-all min-h-[220px]">
-          <div className="w-14 h-14 rounded-full bg-white border border-gray-100 flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
-            <Plus size={24} />
-          </div>
-          <h4 className="text-lg font-bold text-gray-900 mb-1">New Subtopic</h4>
-          <p className="text-xs text-gray-400 max-w-[180px]">Define a specific niche within this topic area.</p>
-        </button>
+        <div className="relative group">
+          <button
+            disabled={!canContribute}
+            className={`w-full rounded-[2rem] border-2 border-dashed p-6 flex flex-col items-center justify-center text-center min-h-[220px] transition-all ${canContribute
+                ? 'bg-gray-50/50 border-gray-200 hover:bg-white hover:border-indigo-300 cursor-pointer'
+                : 'bg-gray-100/50 border-gray-300 cursor-not-allowed opacity-60'
+              }`}
+          >
+            <div className={`w-14 h-14 rounded-full border flex items-center justify-center mb-4 shadow-sm transition-all ${canContribute
+                ? 'bg-white border-gray-100 group-hover:bg-indigo-600 group-hover:text-white'
+                : 'bg-gray-200 border-gray-300 text-gray-500'
+              }`}>
+              {canContribute ? <Plus size={24} /> : <Lock size={24} />}
+            </div>
+            <h4 className="text-lg font-bold text-gray-900 mb-1">
+              {canContribute ? 'New Subtopic' : 'Locked - Silver+ Only'}
+            </h4>
+            <p className="text-xs text-gray-400 max-w-[180px]">
+              {canContribute
+                ? 'Define a specific niche within this topic area.'
+                : 'Reach Silver level to add subtopics.'}
+            </p>
+          </button>
+          {!canContribute && isBronze && (
+            <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-gray-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-10 font-medium">
+              <div className="flex items-start space-x-2">
+                <Info size={14} className="flex-shrink-0 mt-0.5" />
+                <span>Bronze contributors cannot add subtopics. Reach Silver level (40+ trust score) through community engagement.</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Contribution Highlight */}
@@ -91,7 +122,7 @@ export const SubtopicExplorer: React.FC = () => {
           </div>
           <h3 className="text-3xl font-black mb-4">Complete the {topic.title} Path.</h3>
           <p className="text-indigo-100 text-lg mb-8 leading-relaxed">
-            Our AI analysis shows that this topic is missing a subtopic for <strong>"Future Trends & Research"</strong>. 
+            Our AI analysis shows that this topic is missing a subtopic for <strong>"Future Trends & Research"</strong>.
             Contribute this missing link to earn a "Pathfinder" badge and 500 Reputation Points.
           </p>
           <button className="bg-white text-indigo-700 px-8 py-4 rounded-2xl font-black shadow-xl hover:bg-indigo-50 hover:scale-105 transition-all">

@@ -29,6 +29,88 @@ interface UploadWizardProps {
 }
 
 export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete }) => {
+  const user = authService.getUser();
+
+  // Check if community contributor has permission to upload
+  if (user && user.role === 'community_contributor' && user.communityMetrics) {
+    const isBronze = user.communityMetrics.trustLevel === 'bronze';
+    if (isBronze) {
+      return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden">
+            <div className="bg-gradient-to-r from-orange-600 to-amber-600 p-8 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                    <UploadCloud size={32} />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-black">🥉 Bronze Level</h1>
+                    <p className="text-orange-100 font-medium">Contribution locked</p>
+                  </div>
+                </div>
+                <button onClick={onClose} className="p-3 hover:bg-white/20 rounded-full transition-colors">
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+            <div className="p-8">
+              <h2 className="text-2xl font-black text-gray-900 mb-4">
+                Build Your Trust to Contribute
+              </h2>
+              <p className="text-gray-700 font-medium mb-6">
+                As a Bronze level contributor, you need to reach <span className="font-black text-gray-900">Silver level (40+ trust score)</span> to upload content.
+              </p>
+
+              <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-6 mb-6">
+                <h3 className="font-black text-orange-900 mb-3">How to Reach Silver Level:</h3>
+                <ul className="space-y-2 text-sm text-orange-800 font-medium">
+                  <li className="flex items-start space-x-2">
+                    <span className="text-orange-600 font-black">•</span>
+                    <span>Browse and comment on existing notes</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-orange-600 font-black">•</span>
+                    <span>Provide helpful feedback to other contributors</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-orange-600 font-black">•</span>
+                    <span>Receive upvotes on your comments</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-orange-600 font-black">•</span>
+                    <span>Engage positively with the community</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-900 rounded-2xl p-4 mb-6 text-white">
+                <div className="flex items-start space-x-3">
+                  <span className="text-2xl">💡</span>
+                  <div>
+                    <p className="text-sm font-medium text-gray-300">
+                      Your current trust score: <span className="font-black text-white">{user.communityMetrics.trustScore || 0}</span>/100
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      You need 40+ to unlock contributions
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={onClose}
+                className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black hover:bg-orange-700 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
@@ -438,7 +520,7 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                 onQuizAttached={(quiz) => {
                   setSelection({ ...selection, attachedQuiz: quiz });
                 }}
-                onSkip={() => { }}
+                onSkip={handleSubmit}
               />
             </div>
           )}

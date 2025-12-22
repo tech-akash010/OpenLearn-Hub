@@ -182,6 +182,120 @@ export const QuizCreationPage: React.FC = () => {
 
     if (!user) return null;
 
+    // Check permissions
+    if (!authService.canCreateQuizzes(user)) {
+        const isBronzeContributor = user.role === 'community_contributor' && user.communityMetrics?.trustLevel === 'bronze';
+
+        if (isBronzeContributor) {
+            return (
+                <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+                    <div className="max-w-2xl w-full">
+                        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                            <div className="bg-gradient-to-r from-orange-600 to-amber-600 p-8 text-white">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                                        <BookOpen size={32} />
+                                    </div>
+                                    <div>
+                                        <h1 className="text-3xl font-black">🥉 Bronze Level</h1>
+                                        <p className="text-orange-100 font-medium">Quiz creation locked</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-8">
+                                <h2 className="text-2xl font-black text-gray-900 mb-4">
+                                    Build Your Trust to Create Quizzes
+                                </h2>
+                                <p className="text-gray-700 font-medium mb-6">
+                                    As a Bronze level contributor, you need to reach <span className="font-black text-gray-900">Silver level (40+ trust score)</span> to create quizzes.
+                                </p>
+
+                                <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-6 mb-6">
+                                    <h3 className="font-black text-orange-900 mb-3">How to Reach Silver Level:</h3>
+                                    <ul className="space-y-2 text-sm text-orange-800 font-medium">
+                                        <li className="flex items-start space-x-2">
+                                            <span className="text-orange-600 font-black">•</span>
+                                            <span>Upload high-quality notes consistently</span>
+                                        </li>
+                                        <li className="flex items-start space-x-2">
+                                            <span className="text-orange-600 font-black">•</span>
+                                            <span>Receive upvotes on your uploaded notes</span>
+                                        </li>
+                                        <li className="flex items-start space-x-2">
+                                            <span className="text-orange-600 font-black">•</span>
+                                            <span>Get helpful marks from the community</span>
+                                        </li>
+                                        <li className="flex items-start space-x-2">
+                                            <span className="text-orange-600 font-black">•</span>
+                                            <span>Maintain a positive contribution ratio</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div className="bg-gray-900 rounded-2xl p-4 mb-6 text-white">
+                                    <div className="flex items-start space-x-3">
+                                        <span className="text-2xl">💡</span>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-300">
+                                                Your current trust score: <span className="font-black text-white">{user.communityMetrics?.trustScore || 0}</span>/100
+                                            </p>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                You need 40+ to unlock quiz creation
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center space-x-4">
+                                    <button
+                                        onClick={() => navigate('/')}
+                                        className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-black hover:bg-gray-200 transition-all"
+                                    >
+                                        Back to Dashboard
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/notes/upload')}
+                                        className="flex-1 py-4 bg-orange-600 text-white rounded-2xl font-black hover:bg-orange-700 transition-all"
+                                    >
+                                        Upload Notes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        } else {
+            // Unverified Users Lock Screen
+            return (
+                <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+                    <div className="max-w-xl w-full">
+                        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden text-center">
+                            <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-8 text-white">
+                                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <CheckCircle size={32} />
+                                </div>
+                                <h1 className="text-2xl font-black mb-1">Verification Required</h1>
+                                <p className="text-gray-400">Unlock quiz creation features</p>
+                            </div>
+                            <div className="p-8">
+                                <p className="text-gray-600 font-medium mb-6">
+                                    To create quizzes, you need to be a <span className="font-black text-gray-900">verified member</span> of the community. This helps us ensure quality content.
+                                </p>
+                                <button
+                                    onClick={() => navigate('/')}
+                                    className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+                                >
+                                    Go to Dashboard to Verify
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    }
+
     const publishingInfo = quizPublishingService.getPublishingInfo(user);
     const availableNotes = uploadedNotes.filter(note => !note.hasQuiz);
 

@@ -3,19 +3,25 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { INITIAL_SUBJECTS, INITIAL_TOPICS } from '../constants';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { ChevronRight, Layout, Plus, Star, Users, CheckCircle2, ArrowRight } from 'lucide-react';
+import { ChevronRight, Layout, Plus, Star, Users, CheckCircle2, ArrowRight, Lock, Info } from 'lucide-react';
+import { authService } from '../services/authService';
 
 export const TopicExplorer: React.FC = () => {
   const { subjectId } = useParams<{ subjectId: string }>();
   const subject = INITIAL_SUBJECTS.find(s => s.id === subjectId);
   const topics = INITIAL_TOPICS.filter(t => t.subjectId === subjectId);
+  const user = authService.getUser();
+
+  // Check if user can contribute
+  const canContribute = user ? authService.canUploadNotes(user) : true;
+  const isBronze = user?.role === 'community_contributor' && user?.communityMetrics?.trustLevel === 'bronze';
 
   if (!subject) return <div>Subject not found</div>;
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 max-w-6xl mx-auto">
       <Breadcrumbs items={[{ label: 'Hub', path: '/hub' }, { label: subject.name, path: `/hub/subject/${subject.id}` }]} />
-      
+
       <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="max-w-2xl">
           <div className="flex items-center space-x-3 mb-6">
@@ -50,9 +56,8 @@ export const TopicExplorer: React.FC = () => {
             <div className="flex items-start justify-between mb-8">
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-4">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                    topic.status === 'verified' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${topic.status === 'verified' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
+                    }`}>
                     {topic.status}
                   </span>
                   <span className="px-3 py-1 rounded-full bg-gray-50 text-gray-400 text-[10px] font-black uppercase tracking-widest">
@@ -67,7 +72,7 @@ export const TopicExplorer: React.FC = () => {
                 <ArrowRight size={28} />
               </div>
             </div>
-            
+
             <p className="text-gray-500 font-medium leading-relaxed mb-10 flex-1 h-12 line-clamp-2">
               {topic.description}
             </p>
@@ -85,21 +90,44 @@ export const TopicExplorer: React.FC = () => {
                 Browse Subtopics <ChevronRight size={14} className="ml-1" />
               </div>
             </div>
-            
+
             {/* Corner Decorative */}
             <CheckCircle2 size={80} className="absolute -bottom-6 -right-6 text-gray-50/50 group-hover:text-blue-50/80 transition-colors" />
           </Link>
         ))}
 
-        <button className="bg-gray-50/50 p-10 rounded-[3rem] border-2 border-dashed border-gray-200 hover:bg-white hover:border-blue-300 transition-all group flex flex-col items-center justify-center text-center min-h-[340px]">
-          <div className="w-16 h-16 rounded-full bg-white border border-gray-100 flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-            <Plus size={32} />
-          </div>
-          <h3 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">Add New Topic</h3>
-          <p className="text-gray-500 font-medium max-w-[280px] leading-relaxed">
-            Expand the {subject.name} core curriculum with a verified new topic area.
-          </p>
-        </button>
+        <div className="relative group">
+          <button
+            disabled={!canContribute}
+            className={`w-full p-10 rounded-[3rem] border-2 border-dashed flex flex-col items-center justify-center text-center min-h-[340px] transition-all ${canContribute
+                ? 'bg-gray-50/50 border-gray-200 hover:bg-white hover:border-blue-300 cursor-pointer'
+                : 'bg-gray-100/50 border-gray-300 cursor-not-allowed opacity-60'
+              }`}
+          >
+            <div className={`w-16 h-16 rounded-full border flex items-center justify-center mb-6 shadow-sm transition-all ${canContribute
+                ? 'bg-white border-gray-100 group-hover:bg-blue-600 group-hover:text-white'
+                : 'bg-gray-200 border-gray-300 text-gray-500'
+              }`}>
+              {canContribute ? <Plus size={32} /> : <Lock size={32} />}
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">
+              {canContribute ? 'Add New Topic' : 'Locked - Silver+ Only'}
+            </h3>
+            <p className="text-gray-500 font-medium max-w-[280px] leading-relaxed">
+              {canContribute
+                ? `Expand the ${subject.name} core curriculum with a verified new topic area.`
+                : 'Reach Silver level to propose new topics.'}
+            </p>
+          </button>
+          {!canContribute && isBronze && (
+            <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-gray-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-10 font-medium">
+              <div className="flex items-start space-x-2">
+                <Info size={14} className="flex-shrink-0 mt-0.5" />
+                <span>Bronze contributors cannot add topics. Reach Silver level (40+ trust score) through community engagement.</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

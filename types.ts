@@ -58,6 +58,9 @@ export interface User {
   verificationStatus: VerificationStatus;
   verificationLevel: VerificationLevel;
   verificationData?: VerificationData;
+  university?: string;
+  semester?: string;
+  channelName?: string;
   communityMetrics?: CommunityMetrics;
   joinedDate: string;
   reputation: number;
@@ -183,7 +186,7 @@ export interface ContentSourceMetadata {
 }
 
 // Multi-Path Content Organization Types
-export type OrganizationPath = 'subject' | 'university' | 'channel';
+export type OrganizationPath = 'subject' | 'university' | 'channel' | 'course';
 
 export interface SubjectPath {
   subject: string;
@@ -207,11 +210,20 @@ export interface ChannelPath {
   resourceTitle: string;
 }
 
+export interface CoursePath {
+  provider: string; // e.g., Coursera, Udemy, YouTube, NPTEL
+  instructor: string; // e.g., CodeWithHarry, Stanford, Google
+  courseName: string; // e.g., Python Zero to Hero
+  topic: string; // e.g., Python Intro
+  resourceTitle: string;
+}
+
 export interface ContentOrganization {
   subjectPath?: SubjectPath;
   universityPath?: UniversityPath;
   channelPath?: ChannelPath;
-  primaryPath: OrganizationPath;
+  coursePath?: CoursePath;
+  primaryPath: OrganizationPath | 'course';
 }
 
 export interface ContentUpload {

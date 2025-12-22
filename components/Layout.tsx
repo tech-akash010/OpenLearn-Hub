@@ -16,14 +16,17 @@ import {
   LogOut,
   Sparkles,
   FileQuestion,
-  Compass
+  Compass,
+  HardDrive
 } from 'lucide-react';
 import { authService } from '../services/authService';
+import { AuthRequiredModal } from './AuthRequiredModal';
 import { User } from '../types';
 
-const NavItem: React.FC<{ to: string; icon: React.ReactNode; label: string; active: boolean }> = ({ to, icon, label, active }) => (
+const NavItem: React.FC<{ to: string; icon: React.ReactNode; label: string; active: boolean; onClick?: () => void }> = ({ to, icon, label, active, onClick }) => (
   <Link
     to={to}
+    onClick={onClick}
     className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${active
       ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
       : 'text-gray-600 hover:bg-gray-100'
@@ -40,9 +43,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [user, setUser] = useState<User | null>(authService.getUser());
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalFeature, setAuthModalFeature] = useState('');
 
   useEffect(() => {
-    const handleAuth = () => setUser(authService.getUser());
+    const handleAuth = () => {
+      const currentUser = authService.getUser();
+      setUser(currentUser);
+      if (currentUser) {
+        setAuthModalOpen(false);
+      }
+    };
     window.addEventListener('auth-change', handleAuth);
     return () => window.removeEventListener('auth-change', handleAuth);
   }, []);
@@ -53,10 +64,25 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     navigate('/login');
   };
 
+  const handleRestrictedClick = (e: React.MouseEvent, feature: string) => {
+    if (!user) {
+      e.preventDefault();
+      setAuthModalFeature(feature);
+      setAuthModalOpen(true);
+    }
+  };
+
   if (location.pathname === '/login' || location.pathname === '/signup') return <>{children}</>;
 
   return (
     <div className="min-h-screen flex bg-gray-50 overflow-hidden">
+      {/* Auth Required Modal */}
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        feature={authModalFeature}
+      />
+
       {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0
@@ -74,13 +100,30 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
           <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
             <NavItem to="/" icon={<Home size={20} />} label="Dashboard" active={location.pathname === '/'} />
-            <NavItem to="/hub" icon={<BookOpen size={20} />} label="Start Contribution" active={location.pathname.startsWith('/hub')} />
+            <NavItem to="/hub" icon={<BookOpen size={20} />} label="Community Notes" active={location.pathname.startsWith('/hub')} />
+
+            {/* Accessible to all - guests can browse */}
+            <NavItem to="/my-drive" icon={<HardDrive size={20} />} label="My Drive" active={location.pathname === '/my-drive'} />
             <NavItem to="/browse" icon={<Compass size={20} />} label="Browse Paths" active={location.pathname === '/browse'} />
-            <NavItem to="/quiz/create" icon={<FileQuestion size={20} />} label="Create Quiz" active={location.pathname === '/quiz/create'} />
-            <NavItem to="/ai-assistant" icon={<Sparkles size={20} />} label="AI Assistant" active={location.pathname === '/ai-assistant'} />
-            <NavItem to="/drive" icon={<Cloud size={20} />} label="Drive Organizer" active={location.pathname === '/drive'} />
             <NavItem to="/heatmap" icon={<PieChart size={20} />} label="Topic Heatmap" active={location.pathname === '/heatmap'} />
             <NavItem to="/leaderboard" icon={<Award size={20} />} label="Contributors" active={location.pathname === '/leaderboard'} />
+
+            {/* Restricted features - require auth */}
+            {user ? (
+              <>
+                <NavItem to="/quiz/create" icon={<FileQuestion size={20} />} label="Create Quiz" active={location.pathname === '/quiz/create'} />
+                <NavItem to="/ai-assistant" icon={<Sparkles size={20} />} label="AI Assistant" active={location.pathname === '/ai-assistant'} />
+              </>
+            ) : (
+              <>
+                <div onClick={(e) => handleRestrictedClick(e, 'Create Quiz')}>
+                  <NavItem to="#" icon={<FileQuestion size={20} />} label="Create Quiz" active={false} />
+                </div>
+                <div onClick={(e) => handleRestrictedClick(e, 'AI Assistant')}>
+                  <NavItem to="#" icon={<Sparkles size={20} />} label="AI Assistant" active={false} />
+                </div>
+              </>
+            )}
           </nav>
 
           <div className="p-4 border-t border-gray-100">
@@ -121,7 +164,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white hover:scale-105 transition-transform"
               >
-                {user?.avatar || user?.name.charAt(0) || 'U'}
+                {user?.avatar || user?.name?.charAt(0) || 'U'}
               </button>
 
               {userMenuOpen && (

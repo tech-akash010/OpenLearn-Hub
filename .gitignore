@@ -37,6 +37,7 @@ pnpm-debug.log*
 coverage/
 .nyc_output/
 
+<<<<<<< HEAD
 # Vercel
 .vercel
 
@@ -47,3 +48,23 @@ coverage/
 
 # Debug
 .antigravityignore
+=======
+# Env files
+.env
+.env.test
+.env.production
+
+# Coverage
+coverage/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+>>>>>>> 9b389847aa6dbd5c03f9083618fa93aed7ce6372

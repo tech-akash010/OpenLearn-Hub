@@ -15,11 +15,14 @@ import {
   Sparkles,
   FileText,
   Loader2,
-  Bookmark
+  Bookmark,
+  Lock,
+  Info
 } from 'lucide-react';
 import { driveSyncService } from '../services/driveSyncService';
 import { geminiService } from '../services/geminiService';
 import { interactionService } from '../services/interactionService';
+import { authService } from '../services/authService';
 import { ContentInteraction } from '../types';
 
 export const ContentDetail: React.FC = () => {
@@ -27,6 +30,11 @@ export const ContentDetail: React.FC = () => {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [interactions, setInteractions] = useState<Map<string, ContentInteraction>>(new Map());
+  const user = authService.getUser();
+
+  // Check if user can contribute
+  const canContribute = user ? authService.canUploadNotes(user) : true;
+  const isBronze = user?.role === 'community_contributor' && user?.communityMetrics?.trustLevel === 'bronze';
 
   const subject = INITIAL_SUBJECTS.find(s => s.id === subjectId);
   const topic = INITIAL_TOPICS.find(t => t.id === topicId);
@@ -123,9 +131,32 @@ export const ContentDetail: React.FC = () => {
             <p className="text-gray-500 font-medium max-w-md mx-auto mb-10 text-lg leading-relaxed">
               This niche subtopic hasn't been documented by our experts yet. Be the pioneer contributor for this path.
             </p>
-            <button className="bg-blue-600 text-white px-12 py-5 rounded-[2rem] font-black hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200">
-              Contribute First Guide
-            </button>
+            <div className="relative inline-block group">
+              <button
+                disabled={!canContribute}
+                className={`px-12 py-5 rounded-[2rem] font-black transition-all shadow-2xl ${canContribute
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer'
+                    : 'bg-gray-300 text-gray-600 cursor-not-allowed shadow-gray-200'
+                  }`}
+              >
+                {canContribute ? (
+                  'Contribute First Guide'
+                ) : (
+                  <>
+                    <Lock className="inline mr-2" size={20} />
+                    Locked - Silver+ Only
+                  </>
+                )}
+              </button>
+              {!canContribute && isBronze && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 p-3 bg-gray-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-10 font-medium whitespace-nowrap">
+                  <div className="flex items-start space-x-2">
+                    <Info size={14} className="flex-shrink-0 mt-0.5" />
+                    <span>Bronze contributors cannot upload content. Reach Silver level (40+ trust score).</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           content.map(item => {

@@ -36,6 +36,13 @@ export const DEMO_CONTENTS: DemoContent[] = [
                 playlistName: 'DSA Full Course',
                 topic: 'Arrays',
                 resourceTitle: 'Array Implementation Notes'
+            },
+            coursePath: {
+                provider: 'YouTube',
+                instructor: 'CodeWithHarry',
+                courseName: 'DSA Full Course',
+                topic: 'Arrays',
+                resourceTitle: 'Array Implementation Notes'
             }
         },
         uploadedBy: 'Rahul Kumar',
@@ -67,6 +74,13 @@ export const DEMO_CONTENTS: DemoContent[] = [
                 playlistName: 'Algorithms',
                 topic: 'Trees',
                 resourceTitle: 'BST Lecture Notes'
+            },
+            coursePath: {
+                provider: 'Udemy',
+                instructor: 'Abdul Bari',
+                courseName: 'Mastering Data Structures & Algorithms',
+                topic: 'Trees and BST',
+                resourceTitle: 'BST Lecture Notes'
             }
         },
         uploadedBy: 'Priya Sharma',
@@ -89,6 +103,13 @@ export const DEMO_CONTENTS: DemoContent[] = [
             channelPath: {
                 channelName: 'Apna College',
                 playlistName: 'Python Tutorial Series',
+                topic: 'Loops and Iterations',
+                resourceTitle: 'Complete Loops Guide'
+            },
+            coursePath: {
+                provider: 'Coursera',
+                instructor: 'Google',
+                courseName: 'Crash Course on Python',
                 topic: 'Loops and Iterations',
                 resourceTitle: 'Complete Loops Guide'
             }
@@ -122,6 +143,13 @@ export const DEMO_CONTENTS: DemoContent[] = [
                 playlistName: 'Operating Systems',
                 topic: 'Process Scheduling',
                 resourceTitle: 'Scheduling Algorithms Notes'
+            },
+            coursePath: {
+                provider: 'YouTube',
+                instructor: 'Gate Smashers',
+                courseName: 'Operating Systems Complete Course',
+                topic: 'Process Scheduling',
+                resourceTitle: 'Scheduling Algorithms Notes'
             }
         },
         uploadedBy: 'Sneha Reddy',
@@ -152,6 +180,13 @@ export const DEMO_CONTENTS: DemoContent[] = [
                 channelName: 'Jenny\'s Lectures',
                 playlistName: 'DBMS Complete Course',
                 topic: 'Normalization',
+                resourceTitle: 'Normalization Forms Explained'
+            },
+            coursePath: {
+                provider: 'Udemy',
+                instructor: 'Tim Buchalka',
+                courseName: 'The Complete SQL Bootcamp',
+                topic: 'Database Normalization',
                 resourceTitle: 'Normalization Forms Explained'
             }
         },
@@ -184,6 +219,13 @@ export const DEMO_CONTENTS: DemoContent[] = [
                 playlistName: 'Machine Learning Course',
                 topic: 'Introduction to ML',
                 resourceTitle: 'ML Basics Lecture Notes'
+            },
+            coursePath: {
+                provider: 'Coursera',
+                instructor: 'Andrew Ng',
+                courseName: 'Machine Learning Specialization',
+                topic: 'Supervised Learning',
+                resourceTitle: 'ML Basics Lecture Notes'
             }
         },
         uploadedBy: 'Ananya Gupta',
@@ -206,6 +248,13 @@ export const DEMO_CONTENTS: DemoContent[] = [
             channelPath: {
                 channelName: 'CodeWithHarry',
                 playlistName: 'React Tutorial',
+                topic: 'React Hooks',
+                resourceTitle: 'Hooks Comprehensive Notes'
+            },
+            coursePath: {
+                provider: 'YouTube',
+                instructor: 'CodeWithHarry',
+                courseName: 'React JS - Complete Course for Beginners',
                 topic: 'React Hooks',
                 resourceTitle: 'Hooks Comprehensive Notes'
             }
@@ -238,6 +287,13 @@ export const DEMO_CONTENTS: DemoContent[] = [
                 channelName: 'Neso Academy',
                 playlistName: 'Computer Networks',
                 topic: 'OSI Model',
+                resourceTitle: 'OSI Layers Complete Notes'
+            },
+            coursePath: {
+                provider: 'NPTEL',
+                instructor: 'IIT Kharagpur',
+                courseName: 'Computer Networks and Internet Protocol',
+                topic: 'OSI Reference Model',
                 resourceTitle: 'OSI Layers Complete Notes'
             }
         },

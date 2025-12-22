@@ -108,6 +108,7 @@ export const authService = {
   /**
    * Check if user can upload/publish notes
    * All verified users (students, teachers, educators) can upload notes
+   * High reputation students can also upload without explicit verification
    */
   canUploadNotes(user: User | null): boolean {
     if (!user) return false;
@@ -117,7 +118,17 @@ export const authService = {
       return user.communityMetrics?.canUploadNotes || false;
     }
 
-    // All other verified users can upload notes
+    // Teachers and Online Educators generally have access (verification optional/post-check)
+    if (user.role === 'teacher' || user.role === 'online_educator') {
+      return true;
+    }
+
+    // High reputation students (>= 500) bypass verification
+    if (user.role === 'student' && user.reputation >= 500) {
+      return true;
+    }
+
+    // Students need to be verified
     return user.verificationStatus === 'verified';
   },
 
@@ -130,14 +141,26 @@ export const authService = {
     return user !== null;
   },
 
-  /**
-   * Check if user can create quizzes
-   * DEPRECATED: Quizzes are created by chatbot only
-   * Kept for backward compatibility but always returns false
-   */
   canCreateQuizzes(user: User | null): boolean {
-    // Quizzes are created by chatbot only
-    return false;
+    if (!user) return false;
+
+    // Teachers and Online Educators can always create quizzes
+    if (user.role === 'teacher' || user.role === 'online_educator') {
+      return true;
+    }
+
+    // Community contributors need Silver or Gold level
+    if (user.role === 'community_contributor') {
+      return user.communityMetrics?.trustLevel !== 'bronze';
+    }
+
+    // High reputation students (>= 500) bypass verification
+    if (user.role === 'student' && user.reputation >= 500) {
+      return true;
+    }
+
+    // Students need to be verified
+    return user.verificationStatus === 'verified';
   },
 
   /**

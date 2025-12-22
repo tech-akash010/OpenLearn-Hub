@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, FileText, FileQuestion, Eye, Calendar, CheckCircle, Clock, XCircle, Plus } from 'lucide-react';
+import { Upload, FileText, FileQuestion, Eye, Calendar, CheckCircle, Clock, XCircle, Plus, Lock, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 
@@ -8,8 +8,14 @@ export const ContributionPage: React.FC = () => {
     const user = authService.getUser();
     const [activeTab, setActiveTab] = useState<'notes' | 'quizzes'>('notes');
 
+    // Check upload permissions for community contributors
+    const canUploadNotes = user ? authService.canUploadNotes(user) : false;
+    const isCommunityCont = user?.role === 'community_contributor';
+    const isBronze = isCommunityCont && user?.communityMetrics?.trustLevel === 'bronze';
+
     // Mock data for user's contributions
-    const myNotes = [
+    // Bronze community contributors cannot upload, so they should have no contributions
+    const myNotes = (isCommunityCont && isBronze) ? [] : [
         {
             id: '1',
             title: 'Array Implementation in C',
@@ -32,7 +38,7 @@ export const ContributionPage: React.FC = () => {
         }
     ];
 
-    const myQuizzes = [
+    const myQuizzes = (isCommunityCont && isBronze) ? [] : [
         {
             id: '1',
             title: 'Arrays Quiz',
@@ -72,21 +78,41 @@ export const ContributionPage: React.FC = () => {
                 {/* Quick Actions */}
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
                     <button
-                        onClick={() => navigate('/notes/upload')}
-                        className="group bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-8 text-left hover:shadow-2xl transition-all transform hover:scale-105"
+                        onClick={canUploadNotes ? () => navigate('/notes/upload') : undefined}
+                        disabled={!canUploadNotes}
+                        className={`group rounded-2xl p-8 text-left transition-all ${canUploadNotes
+                            ? 'bg-gradient-to-br from-blue-500 to-cyan-600 hover:shadow-2xl transform hover:scale-105 cursor-pointer'
+                            : 'bg-gray-300 cursor-not-allowed opacity-75'
+                            }`}
                     >
                         <div className="flex items-center space-x-4 mb-4">
-                            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                                <Upload className="text-white" size={32} />
+                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-sm ${canUploadNotes ? 'bg-white/20' : 'bg-gray-400/30'
+                                }`}>
+                                {canUploadNotes ? (
+                                    <Upload className="text-white" size={32} />
+                                ) : (
+                                    <Lock className="text-gray-600" size={32} />
+                                )}
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black text-white mb-1">Upload Notes</h3>
-                                <p className="text-blue-100 font-medium">Share your knowledge</p>
+                                <h3 className="text-2xl font-black text-white mb-1">
+                                    Upload Notes {!canUploadNotes && '🔒'}
+                                </h3>
+                                <p className={canUploadNotes ? 'text-blue-100 font-medium' : 'text-gray-600 font-medium'}>
+                                    {canUploadNotes ? 'Share your knowledge' : 'Locked - Silver+ only'}
+                                </p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-2 text-white/80 text-sm font-medium">
-                            <Plus size={16} />
-                            <span>Start new contribution</span>
+                        <div className={`flex items-center space-x-2 text-sm font-medium ${canUploadNotes ? 'text-white/80' : 'text-gray-600'
+                            }`}>
+                            {canUploadNotes ? (
+                                <>
+                                    <Plus size={16} />
+                                    <span>Start new contribution</span>
+                                </>
+                            ) : (
+                                <span>Reach Silver level to unlock</span>
+                            )}
                         </div>
                     </button>
 
@@ -109,6 +135,31 @@ export const ContributionPage: React.FC = () => {
                         </div>
                     </button>
                 </div>
+
+                {/* Bronze Level Info Banner */}
+                {isBronze && (
+                    <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-6 mb-8">
+                        <div className="flex items-start space-x-3">
+                            <Info className="text-orange-600 flex-shrink-0 mt-1" size={24} />
+                            <div>
+                                <h3 className="font-black text-orange-900 mb-2">🥉 Bronze Level - Build Your Trust to Upload</h3>
+                                <p className="text-sm text-orange-800 font-medium mb-3">
+                                    You're currently at Bronze level (Trust Score: {user?.communityMetrics?.trustScore || 0}/100).
+                                    To unlock note uploads, reach Silver level (40+ trust score) by:
+                                </p>
+                                <ul className="text-sm text-orange-800 space-y-1 font-medium mb-3">
+                                    <li>• Browse and comment on existing notes</li>
+                                    <li>• Provide helpful feedback to other contributors</li>
+                                    <li>• Receive upvotes on your comments</li>
+                                    <li>• Engage positively with the community</li>
+                                </ul>
+                                <p className="text-xs text-orange-700 font-bold">
+                                    💡 Your trust score updates automatically based on community engagement!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-6 mb-8">
@@ -134,8 +185,8 @@ export const ContributionPage: React.FC = () => {
                         <button
                             onClick={() => setActiveTab('notes')}
                             className={`p-4 rounded-xl font-black transition-all ${activeTab === 'notes'
-                                    ? 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-lg'
-                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                ? 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-lg'
+                                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                 }`}
                         >
                             <div className="flex items-center justify-center space-x-2">
@@ -146,8 +197,8 @@ export const ContributionPage: React.FC = () => {
                         <button
                             onClick={() => setActiveTab('quizzes')}
                             className={`p-4 rounded-xl font-black transition-all ${activeTab === 'quizzes'
-                                    ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg'
-                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg'
+                                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                 }`}
                         >
                             <div className="flex items-center justify-center space-x-2">
@@ -204,13 +255,19 @@ export const ContributionPage: React.FC = () => {
                                 <div className="bg-white rounded-2xl p-12 text-center shadow-lg">
                                     <FileText size={48} className="text-gray-300 mx-auto mb-4" />
                                     <h3 className="text-xl font-black text-gray-900 mb-2">No notes yet</h3>
-                                    <p className="text-gray-600 mb-6">Start contributing by uploading your first note!</p>
-                                    <button
-                                        onClick={() => navigate('/notes/upload')}
-                                        className="px-6 py-3 bg-gradient-to-br from-blue-500 to-cyan-600 text-white font-black rounded-xl hover:shadow-lg transition-all"
-                                    >
-                                        Upload Your First Note
-                                    </button>
+                                    <p className="text-gray-600 mb-6">
+                                        {canUploadNotes
+                                            ? 'Start contributing by uploading your first note!'
+                                            : 'Reach Silver level to start uploading notes!'}
+                                    </p>
+                                    {canUploadNotes && (
+                                        <button
+                                            onClick={() => navigate('/notes/upload')}
+                                            className="px-6 py-3 bg-gradient-to-br from-blue-500 to-cyan-600 text-white font-black rounded-xl hover:shadow-lg transition-all"
+                                        >
+                                            Upload Your First Note
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </div>

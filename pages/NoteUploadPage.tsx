@@ -1,340 +1,209 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Upload, FileText, ArrowLeft, CheckCircle } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Upload, ArrowLeft } from 'lucide-react';
 import { authService } from '../services/authService';
-import { QuizAttachment } from '../components/QuizAttachment';
-import { FileUpload } from '../components/FileUpload';
-import { WatermarkInput, WatermarkConfig } from '../components/WatermarkInput';
-import { Quiz, Difficulty, UploadedDocument } from '../types';
+import { UploadTypeSelector } from '../components/UploadTypeSelector';
+import { CourseUploadForm } from '../components/CourseUploadForm';
+import { ShareableLink } from '../components/ShareableLink';
+import { UploadWizard } from '../components/UploadWizard';
+import { UploadedDocument } from '../types';
 
 export const NoteUploadPage: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = authService.getUser();
 
-    const [step, setStep] = useState<'details' | 'files' | 'quiz' | 'complete'>('details');
+    // Get initial type from navigation state if available
+    const initialType = location.state?.initialType as 'community' | 'course' | undefined;
+
+    const [uploadType, setUploadType] = useState<'community' | 'course' | null>(initialType || null);
+    const [uploadComplete, setUploadComplete] = useState(false);
+    const [generatedNoteId, setGeneratedNoteId] = useState('');
     const [noteTitle, setNoteTitle] = useState('');
-    const [noteDescription, setNoteDescription] = useState('');
-    const [noteContent, setNoteContent] = useState('');
-    const [subject, setSubject] = useState('Computer Science');
-    const [topic, setTopic] = useState('Operating Systems');
-    const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.Intermediate);
-    const [uploadedFiles, setUploadedFiles] = useState<UploadedDocument[]>([]);
-    const [attachedQuiz, setAttachedQuiz] = useState<Quiz | null>(null);
-    const [watermarkConfig, setWatermarkConfig] = useState<WatermarkConfig>({
-        enabled: false,
-        text: user?.name || '',
-        position: 'bottom-right',
-        opacity: 0.7
-    });
 
     if (!user) return null;
 
-    const handleFileUpload = (file: UploadedDocument) => {
-        setUploadedFiles([...uploadedFiles, file]);
-    };
-
-    const handleFileRemove = (fileId: string) => {
-        setUploadedFiles(uploadedFiles.filter(f => f.id !== fileId));
-    };
-
-    const handleQuizAttached = (quiz: Quiz) => {
-        setAttachedQuiz(quiz);
-        setStep('complete');
-    };
-
-    const handleSkipQuiz = () => {
-        setStep('complete');
-    };
-
-    const handleSubmitNote = () => {
-        const noteData = {
-            title: noteTitle,
-            description: noteDescription,
-            content: noteContent,
-            subject,
-            topic,
-            difficulty,
-            files: uploadedFiles,
-            quiz: attachedQuiz,
-            watermark: watermarkConfig,
-            uploadedBy: user.id,
-            uploadedAt: new Date().toISOString()
-        };
-
-        console.log('Submitting note:', noteData);
-        alert('✅ Note uploaded successfully!' + (attachedQuiz ? ' Quiz attached!' : ''));
-        navigate('/');
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <div className="max-w-4xl mx-auto">
-                {/* Header */}
-                <button
-                    onClick={() => navigate('/')}
-                    className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 font-bold text-sm mb-6"
-                >
-                    <ArrowLeft size={16} />
-                    <span>Back to Dashboard</span>
-                </button>
-
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-                    {/* Page Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white">
-                        <div className="flex items-center space-x-4 mb-4">
-                            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                                <Upload size={32} />
-                            </div>
-                            <div>
-                                <h1 className="text-3xl font-black">Upload Notes</h1>
-                                <p className="text-blue-100 font-medium">Share your knowledge with the community</p>
+    // Check if community contributor has permission to upload notes
+    if (user.role === 'community_contributor' && !authService.canUploadNotes(user)) {
+        return (
+            <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+                <div className="max-w-2xl w-full">
+                    <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                        <div className="bg-gradient-to-r from-orange-600 to-amber-600 p-8 text-white">
+                            <div className="flex items-center space-x-4 mb-4">
+                                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                                    <Upload size={32} />
+                                </div>
+                                <div>
+                                    <h1 className="text-3xl font-black">🥉 Bronze Level</h1>
+                                    <p className="text-orange-100 font-medium">Note uploads locked</p>
+                                </div>
                             </div>
                         </div>
+                        <div className="p-8">
+                            <h2 className="text-2xl font-black text-gray-900 mb-4">
+                                Build Your Trust to Unlock Uploads
+                            </h2>
+                            <p className="text-gray-700 font-medium mb-6">
+                                As a Bronze level contributor, you need to reach <span className="font-black text-gray-900">Silver level (40+ trust score)</span> to upload notes.
+                            </p>
 
-                        {/* Progress Steps */}
-                        <div className="flex items-center space-x-4 mt-6">
-                            <div className={`flex items-center space-x-2 ${step === 'details' ? 'text-white' : 'text-blue-200'}`}>
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${step === 'details' ? 'bg-white text-blue-600' : 'bg-white/20'}`}>
-                                    1
-                                </div>
-                                <span className="font-bold text-sm">Details</span>
+                            <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-6 mb-6">
+                                <h3 className="font-black text-orange-900 mb-3">How to Reach Silver Level:</h3>
+                                <ul className="space-y-2 text-sm text-orange-800 font-medium">
+                                    <li className="flex items-start space-x-2">
+                                        <span className="text-orange-600 font-black">•</span>
+                                        <span>Browse and comment on existing notes</span>
+                                    </li>
+                                    <li className="flex items-start space-x-2">
+                                        <span className="text-orange-600 font-black">•</span>
+                                        <span>Provide helpful feedback to other contributors</span>
+                                    </li>
+                                    <li className="flex items-start space-x-2">
+                                        <span className="text-orange-600 font-black">•</span>
+                                        <span>Receive upvotes on your comments and contributions</span>
+                                    </li>
+                                    <li className="flex items-start space-x-2">
+                                        <span className="text-orange-600 font-black">•</span>
+                                        <span>Engage positively with the community</span>
+                                    </li>
+                                </ul>
                             </div>
-                            <div className="flex-1 h-1 bg-white/20 rounded"></div>
-                            <div className={`flex items-center space-x-2 ${step === 'files' ? 'text-white' : 'text-blue-200'}`}>
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${step === 'files' ? 'bg-white text-blue-600' : 'bg-white/20'}`}>
-                                    2
+
+                            <div className="bg-gray-900 rounded-2xl p-4 mb-6 text-white">
+                                <div className="flex items-start space-x-3">
+                                    <span className="text-2xl">💡</span>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-300">
+                                            Your current trust score: <span className="font-black text-white">{user.communityMetrics?.trustScore || 0}</span>/100
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            You need 40+ to unlock note uploads
+                                        </p>
+                                    </div>
                                 </div>
-                                <span className="font-bold text-sm">Files</span>
                             </div>
-                            <div className="flex-1 h-1 bg-white/20 rounded"></div>
-                            <div className={`flex items-center space-x-2 ${step === 'quiz' ? 'text-white' : 'text-blue-200'}`}>
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${step === 'quiz' ? 'bg-white text-blue-600' : 'bg-white/20'}`}>
-                                    3
-                                </div>
-                                <span className="font-bold text-sm">Quiz (Optional)</span>
+
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={() => navigate('/')}
+                                    className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-black hover:bg-gray-200 transition-all"
+                                >
+                                    Back to Dashboard
+                                </button>
+                                <button
+                                    onClick={() => navigate('/browse')}
+                                    className="flex-1 py-4 bg-orange-600 text-white rounded-2xl font-black hover:bg-orange-700 transition-all"
+                                >
+                                    Browse Notes
+                                </button>
                             </div>
                         </div>
-                    </div>
-
-                    <div className="p-8">
-                        {/* Step 1: Note Details */}
-                        {step === 'details' && (
-                            <div className="space-y-6">
-                                <h2 className="text-2xl font-black text-gray-900 mb-6">Note Details</h2>
-
-                                <div>
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">
-                                        Note Title
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={noteTitle}
-                                        onChange={(e) => setNoteTitle(e.target.value)}
-                                        placeholder="e.g., Process Scheduling Algorithms"
-                                        className="w-full px-6 py-4 bg-gray-900 text-white border-none rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-medium placeholder:text-gray-500"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">
-                                        Description
-                                    </label>
-                                    <textarea
-                                        value={noteDescription}
-                                        onChange={(e) => setNoteDescription(e.target.value)}
-                                        placeholder="Brief description of what these notes cover"
-                                        rows={4}
-                                        className="w-full px-6 py-4 bg-gray-900 text-white border-none rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-medium placeholder:text-gray-500 resize-none"
-                                    />
-                                </div>
-
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">
-                                            Subject
-                                        </label>
-                                        <select
-                                            value={subject}
-                                            onChange={(e) => setSubject(e.target.value)}
-                                            className="w-full px-6 py-4 bg-gray-900 text-white border-none rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-medium"
-                                        >
-                                            <option>Computer Science</option>
-                                            <option>Mathematics</option>
-                                            <option>Physics</option>
-                                            <option>Chemistry</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">
-                                            Topic
-                                        </label>
-                                        <select
-                                            value={topic}
-                                            onChange={(e) => setTopic(e.target.value)}
-                                            className="w-full px-6 py-4 bg-gray-900 text-white border-none rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-medium"
-                                        >
-                                            <option>Operating Systems</option>
-                                            <option>Data Structures</option>
-                                            <option>Algorithms</option>
-                                            <option>Databases</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">
-                                        Difficulty Level
-                                    </label>
-                                    <select
-                                        value={difficulty}
-                                        onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-                                        className="w-full px-6 py-4 bg-gray-900 text-white border-none rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-medium"
-                                    >
-                                        <option value={Difficulty.Beginner}>Beginner</option>
-                                        <option value={Difficulty.Intermediate}>Intermediate</option>
-                                        <option value={Difficulty.Advanced}>Advanced</option>
-                                    </select>
-                                </div>
-
-                                <button
-                                    onClick={() => setStep('files')}
-                                    disabled={!noteTitle.trim()}
-                                    className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Continue to File Upload
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Step 2: File Upload & Notes */}
-                        {step === 'files' && (
-                            <div className="space-y-6">
-                                <h2 className="text-2xl font-black text-gray-900 mb-6">Upload Content</h2>
-                                <p className="text-sm text-gray-600 mb-4">
-                                    Add your notes by typing them below, uploading PDF documents, or adding images. You can use any combination of these methods.
-                                </p>
-
-                                <FileUpload
-                                    onFileUpload={handleFileUpload}
-                                    onFileRemove={handleFileRemove}
-                                    uploadedFiles={uploadedFiles}
-                                    noteContent={noteContent}
-                                    onNoteChange={setNoteContent}
-                                    maxFiles={5}
-                                    label="Add Your Content"
-                                />
-
-                                {/* Watermark Section */}
-                                <WatermarkInput
-                                    value={watermarkConfig}
-                                    onChange={setWatermarkConfig}
-                                    defaultText={user?.name || 'Your Name'}
-                                />
-
-                                <div className="flex items-center space-x-4">
-                                    <button
-                                        onClick={() => setStep('details')}
-                                        className="px-6 py-4 bg-gray-100 text-gray-700 rounded-2xl font-black hover:bg-gray-200 transition-all"
-                                    >
-                                        Back
-                                    </button>
-                                    <button
-                                        onClick={() => setStep('quiz')}
-                                        disabled={uploadedFiles.length === 0 && !noteContent.trim()}
-                                        className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Continue to Quiz (Optional)
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Step 3: Quiz Attachment */}
-                        {step === 'quiz' && (
-                            <div className="space-y-6">
-                                <h2 className="text-2xl font-black text-gray-900 mb-6">Add a Quiz (Optional)</h2>
-
-                                <QuizAttachment
-                                    user={user}
-                                    subject={subject}
-                                    topic={topic}
-                                    onQuizAttached={handleQuizAttached}
-                                    onSkip={handleSkipQuiz}
-                                />
-
-                                <button
-                                    onClick={() => setStep('files')}
-                                    className="px-6 py-4 bg-gray-100 text-gray-700 rounded-2xl font-black hover:bg-gray-200 transition-all"
-                                >
-                                    Back to Files
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Step 4: Complete */}
-                        {step === 'complete' && (
-                            <div className="text-center py-12">
-                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <CheckCircle className="text-green-600" size={40} />
-                                </div>
-                                <h2 className="text-3xl font-black text-gray-900 mb-3">Ready to Publish!</h2>
-                                <p className="text-gray-600 font-medium mb-8 max-w-md mx-auto">
-                                    Your note is ready to be published
-                                    {attachedQuiz && ' with an attached quiz'}
-                                </p>
-
-                                {/* Summary */}
-                                <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-left max-w-md mx-auto">
-                                    <h3 className="font-black text-gray-900 mb-4">Summary</h3>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Title:</span>
-                                            <span className="font-bold text-gray-900">{noteTitle}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Subject:</span>
-                                            <span className="font-bold text-gray-900">{subject}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Topic:</span>
-                                            <span className="font-bold text-gray-900">{topic}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Files:</span>
-                                            <span className="font-bold text-gray-900">{uploadedFiles.length}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Notes:</span>
-                                            <span className="font-bold text-gray-900">{noteContent.trim() ? `${noteContent.length} chars` : 'None'}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Quiz Attached:</span>
-                                            <span className="font-bold text-gray-900">{attachedQuiz ? 'Yes ✅' : 'No'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center space-x-4 max-w-md mx-auto">
-                                    <button
-                                        onClick={() => setStep('quiz')}
-                                        className="px-6 py-4 bg-gray-100 text-gray-700 rounded-2xl font-black hover:bg-gray-200 transition-all"
-                                    >
-                                        Back
-                                    </button>
-                                    <button
-                                        onClick={handleSubmitNote}
-                                        className="flex-1 py-4 bg-green-600 text-white rounded-2xl font-black hover:bg-green-700 transition-all shadow-lg shadow-green-100"
-                                    >
-                                        Publish Note
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
+
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    const handleCommunityWizardComplete = async (data: any) => {
+        setIsGenerating(true);
+        // Simulate network delay for "generation" effect
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // data.title has the title from the wizard
+        setNoteTitle(data.title || 'Untitled Note');
+        const noteId = `community_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        setGeneratedNoteId(noteId);
+
+        setIsGenerating(false);
+        setUploadComplete(true);
+    };
+
+    const handleCourseUploadComplete = (data: any) => {
+        console.log('Course upload completed:', data);
+        setNoteTitle(data.title);
+    };
+
+    // Show upload type selector first
+    if (!uploadType) {
+        return <UploadTypeSelector onSelect={(type) => setUploadType(type)} />;
+    }
+
+    // Show course upload form if course type selected
+    if (uploadType === 'course') {
+        return (
+            <CourseUploadForm
+                onComplete={handleCourseUploadComplete}
+                onBack={() => setUploadType(null)}
+            />
+        );
+    }
+
+    // Loading State
+    if (isGenerating) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8 flex items-center justify-center">
+                <div className="text-center animate-in fade-in zoom-in duration-500">
+                    <div className="w-24 h-24 bg-white/50 backdrop-blur-xl rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-6 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-cyan-500/20 animate-pulse"></div>
+                        <Upload size={40} className="text-blue-600 animate-bounce" />
+                    </div>
+                    <h2 className="text-2xl font-black text-gray-900 mb-2">Publishing Note...</h2>
+                    <p className="text-gray-500 font-medium">Generating public link and updating library</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show shareable link after community upload complete
+    if (uploadComplete) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8 flex items-center justify-center">
+                <div className="max-w-2xl w-full space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    <ShareableLink
+                        noteId={generatedNoteId}
+                        noteTitle={noteTitle}
+                        noteType="community"
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            onClick={() => {
+                                setUploadComplete(false);
+                                setUploadType(null); // Reset to type selector or wizard
+                            }}
+                            className="w-full py-4 bg-white border-2 border-gray-100 text-gray-700 rounded-2xl font-black hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
+                        >
+                            <Upload size={20} />
+                            <span>Upload Another</span>
+                        </button>
+
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center space-x-2"
+                        >
+                            <ArrowLeft size={20} />
+                            <span>Back to Dashboard</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Show community wizard (replacing previous manual form)
+    if (uploadType === 'community' && !uploadComplete) {
+        return (
+            <UploadWizard
+                onClose={() => setUploadType(null)}
+                onComplete={handleCommunityWizardComplete}
+            />
+        );
+    }
+
+    // Fallback: If for some reason we aren't in community mode but got here
+    return null;
 };

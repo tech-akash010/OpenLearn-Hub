@@ -7,7 +7,8 @@ import { HubExplorer } from './pages/HubExplorer';
 import { TopicExplorer } from './pages/TopicExplorer';
 import { SubtopicExplorer } from './pages/SubtopicExplorer';
 import { ContentDetail } from './pages/ContentDetail';
-import { DriveOrganizer } from './pages/DriveOrganizer';
+import { DrivePage } from './pages/DrivePage';
+import { CourseNoteAccessPage } from './pages/CourseNoteAccessPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { VerificationPage } from './pages/VerificationPage';
@@ -16,6 +17,7 @@ import { AIChatPage } from './pages/AIChatPage';
 import { QuizCreationPage } from './pages/QuizCreationPage';
 import { NoteUploadPage } from './pages/NoteUploadPage';
 import { BrowseByPathPage } from './pages/BrowseByPathPage';
+import { SharedNotePage } from './pages/SharedNotePage';
 import { ContributionPage } from './pages/ContributionPage';
 import { authService } from './services/authService';
 
@@ -39,43 +41,28 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
 
-          <Route path="/" element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          } />
+          {/* Dashboard - accessible to both guests and logged-in users */}
+          <Route path="/" element={<Dashboard />} />
 
-          {/* Strict Hierarchy Routes */}
-          <Route path="/hub" element={
-            <PrivateRoute>
-              <HubExplorer />
-            </PrivateRoute>
-          } />
-          <Route path="/hub/subject/:subjectId" element={
-            <PrivateRoute>
-              <TopicExplorer />
-            </PrivateRoute>
-          } />
-          <Route path="/hub/subject/:subjectId/topic/:topicId" element={
-            <PrivateRoute>
-              <SubtopicExplorer />
-            </PrivateRoute>
-          } />
-          <Route path="/hub/subject/:subjectId/topic/:topicId/subtopic/:subtopicId" element={
-            <PrivateRoute>
-              <ContentDetail />
-            </PrivateRoute>
-          } />
+          {/* Browsing Routes - Accessible to all guests */}
+          <Route path="/hub" element={<HubExplorer />} />
+          <Route path="/hub/subject/:subjectId" element={<TopicExplorer />} />
+          <Route path="/hub/subject/:subjectId/topic/:topicId" element={<SubtopicExplorer />} />
+          <Route path="/hub/subject/:subjectId/topic/:topicId/subtopic/:subtopicId" element={<ContentDetail />} />
 
-          <Route path="/ai-assistant" element={
+          <Route path="/ai-assistant" element={<AIChatPage />} />
+
+          <Route path="/my-drive" element={<DrivePage />} />
+
+          {/* Action Routes - Require authentication */}
+          <Route path="/hub/subject/:subjectId/topic/:topicId/subtopic/:subtopicId/upload" element={
             <PrivateRoute>
-              <AIChatPage />
+              <NoteUploadPage />
             </PrivateRoute>
           } />
-
-          <Route path="/drive" element={
+          <Route path="/course/access/:courseNoteId" element={
             <PrivateRoute>
-              <DriveOrganizer />
+              <CourseNoteAccessPage />
             </PrivateRoute>
           } />
           <Route path="/profile" element={
@@ -88,21 +75,26 @@ const App: React.FC = () => {
               <VerificationPage />
             </PrivateRoute>
           } />
+
+          {/* Upload Notes - Restricted */}
           <Route path="/notes/upload" element={
             <PrivateRoute>
               <NoteUploadPage />
             </PrivateRoute>
           } />
+
+          {/* Create Quiz - Restricted */}
           <Route path="/quiz/create" element={
             <PrivateRoute>
               <QuizCreationPage />
             </PrivateRoute>
           } />
-          <Route path="/browse" element={
-            <PrivateRoute>
-              <BrowseByPathPage />
-            </PrivateRoute>
-          } />
+
+
+          {/* Browse - Accessible to guests */}
+          <Route path="/browse" element={<BrowseByPathPage />} />
+          <Route path="/note/:noteId" element={<SharedNotePage />} />
+
           <Route path="/contribute" element={
             <PrivateRoute>
               <ContributionPage />

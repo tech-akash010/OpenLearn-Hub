@@ -3,7 +3,7 @@ import { BookOpen, GraduationCap, Youtube, ChevronRight, Home, Folder, FileText 
 import { DEMO_CONTENTS } from '../data/demoContents';
 import { EnhancedContentCard } from '../components/EnhancedContentCard';
 
-type BrowseTab = 'subject' | 'university' | 'channel';
+type BrowseTab = 'subject' | 'university' | 'channel' | 'course';
 
 export const BrowseByPathPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<BrowseTab>('subject');
@@ -25,6 +25,12 @@ export const BrowseByPathPage: React.FC = () => {
     const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null);
     const [selectedChannelTopic, setSelectedChannelTopic] = useState<string | null>(null);
 
+    // Course navigation
+    const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+    const [selectedInstructor, setSelectedInstructor] = useState<string | null>(null);
+    const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+    const [selectedCourseTopic, setSelectedCourseTopic] = useState<string | null>(null);
+
     // Reset navigation
     const resetSubjectNav = () => {
         setSelectedSubject(null);
@@ -44,6 +50,13 @@ export const BrowseByPathPage: React.FC = () => {
         setSelectedChannel(null);
         setSelectedPlaylist(null);
         setSelectedChannelTopic(null);
+    };
+
+    const resetCourseNav = () => {
+        setSelectedProvider(null);
+        setSelectedInstructor(null);
+        setSelectedCourse(null);
+        setSelectedCourseTopic(null);
     };
 
     // Get unique values for hierarchical navigation
@@ -193,10 +206,65 @@ export const BrowseByPathPage: React.FC = () => {
         );
     };
 
+    // Course hierarchy (New 4-level)
+    const getUniqueProviders = () => {
+        const providers = new Set<string>();
+        DEMO_CONTENTS.forEach(c => {
+            if (c.organization.coursePath) {
+                providers.add(c.organization.coursePath.provider);
+            }
+        });
+        return Array.from(providers).sort();
+    };
+
+    const getInstructorsForProvider = (provider: string) => {
+        const instructors = new Set<string>();
+        DEMO_CONTENTS.forEach(c => {
+            if (c.organization.coursePath?.provider === provider) {
+                instructors.add(c.organization.coursePath.instructor);
+            }
+        });
+        return Array.from(instructors).sort();
+    };
+
+    const getCoursesForInstructor = (provider: string, instructor: string) => {
+        const courses = new Set<string>();
+        DEMO_CONTENTS.forEach(c => {
+            if (c.organization.coursePath?.provider === provider &&
+                c.organization.coursePath?.instructor === instructor) {
+                courses.add(c.organization.coursePath.courseName);
+            }
+        });
+        return Array.from(courses).sort();
+    };
+
+    const getTopicsForCourse = (provider: string, instructor: string, course: string) => {
+        const topics = new Set<string>();
+        DEMO_CONTENTS.forEach(c => {
+            if (c.organization.coursePath?.provider === provider &&
+                c.organization.coursePath?.instructor === instructor &&
+                c.organization.coursePath?.courseName === course) {
+                topics.add(c.organization.coursePath.topic);
+            }
+        });
+        return Array.from(topics).sort();
+    };
+
+    const getContentForCourseTopic = (provider: string, instructor: string, course: string, topic: string) => {
+        return DEMO_CONTENTS.filter(c =>
+            c.organization.coursePath?.provider === provider &&
+            c.organization.coursePath?.instructor === instructor &&
+            c.organization.coursePath?.courseName === course &&
+            c.organization.coursePath?.topic === topic
+        );
+    };
+
+
     const tabs = [
         { id: 'subject' as BrowseTab, label: 'Subject-wise', icon: BookOpen, color: 'blue', gradient: 'from-blue-500 to-cyan-600' },
         { id: 'university' as BrowseTab, label: 'University-wise', icon: GraduationCap, color: 'blue', gradient: 'from-blue-600 to-indigo-600' },
-        { id: 'channel' as BrowseTab, label: 'Channel-wise', icon: Youtube, color: 'blue', gradient: 'from-cyan-500 to-blue-600' }
+        { id: 'channel' as BrowseTab, label: 'Channel-wise', icon: Youtube, color: 'blue', gradient: 'from-cyan-500 to-blue-600' },
+        { id: 'course' as BrowseTab, label: 'Course-wise', icon: Folder, color: 'purple', gradient: 'from-purple-500 to-pink-600' }
     ];
 
     const currentTab = tabs.find(t => t.id === activeTab)!;
@@ -216,11 +284,18 @@ export const BrowseByPathPage: React.FC = () => {
             if (selectedDepartment) crumbs.push({ label: selectedDepartment.split('(')[1]?.replace(')', '') || selectedDepartment, onClick: () => { setSelectedUniSubject(null); setSelectedUniTopic(null); } });
             if (selectedUniSubject) crumbs.push({ label: selectedUniSubject, onClick: () => setSelectedUniTopic(null) });
             if (selectedUniTopic) crumbs.push({ label: selectedUniTopic, onClick: () => { } });
-        } else {
+        } else if (activeTab === 'channel') {
             crumbs.push({ label: 'Channels', onClick: resetChannelNav });
             if (selectedChannel) crumbs.push({ label: selectedChannel, onClick: () => { setSelectedPlaylist(null); setSelectedChannelTopic(null); } });
             if (selectedPlaylist) crumbs.push({ label: selectedPlaylist, onClick: () => setSelectedChannelTopic(null) });
             if (selectedChannelTopic) crumbs.push({ label: selectedChannelTopic, onClick: () => { } });
+        } else {
+            // Course breadcrumbs
+            crumbs.push({ label: 'Providers', onClick: resetCourseNav });
+            if (selectedProvider) crumbs.push({ label: selectedProvider, onClick: () => { setSelectedInstructor(null); setSelectedCourse(null); setSelectedCourseTopic(null); } });
+            if (selectedInstructor) crumbs.push({ label: selectedInstructor, onClick: () => { setSelectedCourse(null); setSelectedCourseTopic(null); } });
+            if (selectedCourse) crumbs.push({ label: selectedCourse, onClick: () => setSelectedCourseTopic(null) });
+            if (selectedCourseTopic) crumbs.push({ label: selectedCourseTopic, onClick: () => { } });
         }
 
         return (
@@ -298,7 +373,7 @@ export const BrowseByPathPage: React.FC = () => {
 
                 {/* Tabs */}
                 <div className="bg-white rounded-2xl shadow-xl p-2 mb-6 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-4 gap-2">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
@@ -311,6 +386,7 @@ export const BrowseByPathPage: React.FC = () => {
                                         resetSubjectNav();
                                         resetUniversityNav();
                                         resetChannelNav();
+                                        resetCourseNav();
                                     }}
                                     className={`relative p-4 rounded-xl font-black transition-all duration-300 ${isActive
                                         ? `bg-gradient-to-br ${tab.gradient} text-white shadow-lg scale-105`
@@ -549,6 +625,85 @@ export const BrowseByPathPage: React.FC = () => {
                             {selectedChannel && selectedPlaylist && selectedChannelTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {getContentForChannelTopic(selectedChannel, selectedPlaylist, selectedChannelTopic).map((content, index) => (
+                                        <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            <EnhancedContentCard content={content} />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* COURSE PATH (New 4-Level) */}
+                    {activeTab === 'course' && (
+                        <>
+                            {!selectedProvider && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getUniqueProviders().map((provider, index) => (
+                                        <div key={provider} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            {renderCategoryCard(
+                                                provider,
+                                                DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === provider).length,
+                                                () => setSelectedProvider(provider),
+                                                'purple',
+                                                'from-purple-500 to-pink-600'
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {selectedProvider && !selectedInstructor && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getInstructorsForProvider(selectedProvider).map((instructor, index) => (
+                                        <div key={instructor} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            {renderCategoryCard(
+                                                instructor,
+                                                DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === selectedProvider && c.organization.coursePath?.instructor === instructor).length,
+                                                () => setSelectedInstructor(instructor),
+                                                'purple',
+                                                'from-purple-500 to-pink-600'
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {selectedProvider && selectedInstructor && !selectedCourse && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getCoursesForInstructor(selectedProvider, selectedInstructor).map((course, index) => (
+                                        <div key={course} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            {renderCategoryCard(
+                                                course,
+                                                DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === selectedProvider && c.organization.coursePath?.instructor === selectedInstructor && c.organization.coursePath?.courseName === course).length,
+                                                () => setSelectedCourse(course),
+                                                'purple',
+                                                'from-purple-500 to-pink-600'
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {selectedProvider && selectedInstructor && selectedCourse && !selectedCourseTopic && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getTopicsForCourse(selectedProvider, selectedInstructor, selectedCourse).map((topic, index) => (
+                                        <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            {renderCategoryCard(
+                                                topic,
+                                                DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === selectedProvider && c.organization.coursePath?.instructor === selectedInstructor && c.organization.coursePath?.courseName === selectedCourse && c.organization.coursePath?.topic === topic).length,
+                                                () => setSelectedCourseTopic(topic),
+                                                'purple',
+                                                'from-purple-500 to-pink-600'
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {selectedProvider && selectedInstructor && selectedCourse && selectedCourseTopic && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getContentForCourseTopic(selectedProvider, selectedInstructor, selectedCourse, selectedCourseTopic).map((content, index) => (
                                         <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
                                             <EnhancedContentCard content={content} />
                                         </div>
