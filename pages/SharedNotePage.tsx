@@ -4,6 +4,8 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Share2, Download, CheckCircle2, FileText, ArrowLeft, Bookmark, ThumbsUp, MessageSquare } from 'lucide-react';
 import { authService } from '../services/authService';
 
+import { DEMO_CONTENTS } from '../data/demoContents';
+
 export const SharedNotePage: React.FC = () => {
     const { noteId } = useParams<{ noteId: string }>();
     const navigate = useNavigate();
@@ -23,17 +25,22 @@ export const SharedNotePage: React.FC = () => {
         );
     }
 
-    // Mock data for the shared note
-    // In a real app, this would be fetched from backend using noteId
+    // Find the actual demo content
+    const foundContent = DEMO_CONTENTS.find(c => c.id === noteId);
+
+    // Default fallback if not found or for the body text (since demo data doesn't have full text)
     const noteData = {
-        title: "Understanding Process Synchronization",
-        author: "User_" + noteId?.slice(-4) || "Anonymous",
-        subject: "Computer Science",
-        topic: "Operating Systems",
-        uploadedAt: "Just now",
-        content: `
+        title: foundContent?.title || "Understanding Process Synchronization",
+        author: foundContent?.uploadedBy || "User_" + noteId?.slice(-4) || "Anonymous",
+        subject: foundContent?.organization.subjectPath?.subject || "Computer Science",
+        topic: foundContent?.organization.subjectPath?.coreTopic || "Operating Systems",
+        uploadedAt: foundContent?.uploadedAt ? new Date(foundContent.uploadedAt).toLocaleDateString() : "Just now",
+        content: foundContent ? `
+## Description
+${foundContent.description}
+
 ## Introduction
-Process synchronization is the task of coordinating the execution of processes in a way that no two processes can have access to the same shared data and resources.
+(This is placeholder text for the demo note view). Process synchronization is the task of coordinating the execution of processes in a way that no two processes can have access to the same shared data and resources.
 
 ## Critical Section Problem
 The critical section is a code segment where the shared variables can be accessed. An atomic action is required in a critical section i.e. only one process can execute in its critical section at a time. All the other processes have to wait to execute in their critical sections.
@@ -42,10 +49,10 @@ The critical section is a code segment where the shared variables can be accesse
 1. **Mutual Exclusion**: If process Pi is executing in its critical section, then no other processes can be executing in their critical sections.
 2. **Progress**: If no process is executing in its critical section and there exist some processes that wish to enter their critical section, then the selection of the processes that will enter the critical section next cannot be postponed indefinitely.
 3. **Bounded Waiting**: A bound must exist on the number of times that other processes are allowed to enter their critical sections after a process has made a request to enter its critical section and before that request is granted.
-
-## Semaphores
-A semaphore is a signaling mechanism and a thread that is waiting on a semaphore can be signaled by another thread. This is different than a mutex as the mutex can be signaled only by the thread that called the wait function.
-    `.trim()
+        `.trim() : `
+## Introduction
+Process synchronization is the task of coordinating the execution of processes in a way that no two processes can have access to the same shared data and resources.
+        `.trim()
     };
 
     return (

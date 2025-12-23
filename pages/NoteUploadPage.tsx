@@ -198,7 +198,13 @@ export const NoteUploadPage: React.FC = () => {
     if (uploadType === 'community' && !uploadComplete) {
         return (
             <UploadWizard
-                onClose={() => setUploadType(null)}
+                onClose={() => {
+                    if (initialType) {
+                        navigate(-1);
+                    } else {
+                        setUploadType(null);
+                    }
+                }}
                 onComplete={handleCommunityWizardComplete}
             />
         );

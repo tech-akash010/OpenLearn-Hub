@@ -295,11 +295,56 @@ export const DEMO_CONTENTS: DemoContent[] = [
                 courseName: 'Computer Networks and Internet Protocol',
                 topic: 'OSI Reference Model',
                 resourceTitle: 'OSI Layers Complete Notes'
+            },
+            competitiveExamPath: {
+                exam: 'GATE',
+                year: 'Target 2025',
+                subject: 'Computer Science',
+                topic: 'Computer Networks',
+                resourceTitle: 'OSI Model for GATE'
             }
         },
         uploadedBy: 'Kavya Iyer',
         uploadedAt: '2024-02-03T15:20:00Z',
         views: 2890,
         likes: 201
+    },
+    {
+        id: 'content_9',
+        title: 'Rotational Motion - Quick Revision',
+        description: 'Key formulas and concepts for Rotational Motion',
+        organization: {
+            primaryPath: 'competitive_exam',
+            competitiveExamPath: {
+                exam: 'JEE Advanced',
+                year: 'Target 2025',
+                subject: 'Physics',
+                topic: 'Mechanics',
+                resourceTitle: 'Rotational Motion Revision'
+            }
+        },
+        uploadedBy: 'Amit Kumar',
+        uploadedAt: '2024-02-10T09:00:00Z',
+        views: 1500,
+        likes: 120
+    },
+    {
+        id: 'content_10',
+        title: 'Organic Chemistry - Reaction Mechanisms',
+        description: 'Detailed explanation of SN1, SN2, E1, E2 mechanisms',
+        organization: {
+            primaryPath: 'competitive_exam',
+            competitiveExamPath: {
+                exam: 'NEET',
+                year: 'Target 2024',
+                subject: 'Chemistry',
+                topic: 'Organic Chemistry',
+                resourceTitle: 'Reaction Mechanisms Explained'
+            }
+        },
+        uploadedBy: 'Dr. Neha Gupta',
+        uploadedAt: '2024-02-12T11:30:00Z',
+        views: 2200,
+        likes: 180
     }
 ];

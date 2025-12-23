@@ -100,30 +100,43 @@ export const TopicExplorer: React.FC = () => {
           <button
             disabled={!canContribute}
             className={`w-full p-10 rounded-[3rem] border-2 border-dashed flex flex-col items-center justify-center text-center min-h-[340px] transition-all ${canContribute
-                ? 'bg-gray-50/50 border-gray-200 hover:bg-white hover:border-blue-300 cursor-pointer'
-                : 'bg-gray-100/50 border-gray-300 cursor-not-allowed opacity-60'
+              ? 'bg-gray-50/50 border-gray-200 hover:bg-white hover:border-blue-300 cursor-pointer'
+              : 'bg-gray-100/50 border-gray-300 cursor-not-allowed opacity-60'
               }`}
           >
             <div className={`w-16 h-16 rounded-full border flex items-center justify-center mb-6 shadow-sm transition-all ${canContribute
-                ? 'bg-white border-gray-100 group-hover:bg-blue-600 group-hover:text-white'
-                : 'bg-gray-200 border-gray-300 text-gray-500'
+              ? 'bg-white border-gray-100 group-hover:bg-blue-600 group-hover:text-white'
+              : 'bg-gray-200 border-gray-300 text-gray-500'
               }`}>
               {canContribute ? <Plus size={32} /> : <Lock size={32} />}
             </div>
             <h3 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">
-              {canContribute ? 'Add New Topic' : 'Locked - Silver+ Only'}
+              {canContribute
+                ? 'Add New Topic'
+                : user?.role === 'community_contributor'
+                  ? 'Locked - Silver+ Only'
+                  : 'Verification Required'
+              }
             </h3>
             <p className="text-gray-500 font-medium max-w-[280px] leading-relaxed">
               {canContribute
                 ? `Expand the ${subject.name} core curriculum with a verified new topic area.`
-                : 'Reach Silver level to propose new topics.'}
+                : user?.role === 'community_contributor'
+                  ? 'Reach Silver level to propose new topics.'
+                  : 'Verify your profile to unlock contribution features.'
+              }
             </p>
           </button>
-          {!canContribute && isBronze && (
+          {!canContribute && user && (
             <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-gray-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-10 font-medium">
               <div className="flex items-start space-x-2">
                 <Info size={14} className="flex-shrink-0 mt-0.5" />
-                <span>Bronze contributors cannot add topics. Reach Silver level (40+ trust score) through community engagement.</span>
+                <span>
+                  {user?.role === 'community_contributor'
+                    ? 'Bronze contributors cannot add topics. Reach Silver level (40+ trust score) through community engagement.'
+                    : 'You must complete profile verification before contributing new topics.'
+                  }
+                </span>
               </div>
             </div>
           )}

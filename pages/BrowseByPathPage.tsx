@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
-import { BookOpen, GraduationCap, Youtube, ChevronRight, Home, Folder, FileText } from 'lucide-react';
-import { DEMO_CONTENTS } from '../data/demoContents';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen, GraduationCap, Youtube, ChevronRight, Home, Folder, FileText, Trophy } from 'lucide-react';
+import { DEMO_CONTENTS, DemoContent } from '../data/demoContents';
 import { EnhancedContentCard } from '../components/EnhancedContentCard';
+import { CourseGatekeeperModal } from '../components/CourseGatekeeperModal';
 
-type BrowseTab = 'subject' | 'university' | 'channel' | 'course';
+type BrowseTab = 'subject' | 'university' | 'channel' | 'course' | 'competitive_exam';
 
 export const BrowseByPathPage: React.FC = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<BrowseTab>('subject');
+
+    // Gating State
+    const [gatekeeperOpen, setGatekeeperOpen] = useState(false);
+    const [selectedGatedContent, setSelectedGatedContent] = useState<DemoContent | null>(null);
 
     // Subject navigation
     const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -31,7 +38,22 @@ export const BrowseByPathPage: React.FC = () => {
     const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
     const [selectedCourseTopic, setSelectedCourseTopic] = useState<string | null>(null);
 
-    // Reset navigation
+    // Competitive Exam navigation
+    const [selectedExam, setSelectedExam] = useState<string | null>(null);
+    const [selectedExamYear, setSelectedExamYear] = useState<string | null>(null);
+    const [selectedExamSubject, setSelectedExamSubject] = useState<string | null>(null);
+    const [selectedExamTopic, setSelectedExamTopic] = useState<string | null>(null);
+
+    const handleContentClick = (content: DemoContent) => {
+        if (activeTab === 'course') {
+            setSelectedGatedContent(content);
+            setGatekeeperOpen(true);
+        } else {
+            // Direct navigation for other tabs
+            navigate(`/note/${content.id}`);
+        }
+    };
+
     const resetSubjectNav = () => {
         setSelectedSubject(null);
         setSelectedTopic(null);
@@ -53,10 +75,15 @@ export const BrowseByPathPage: React.FC = () => {
     };
 
     const resetCourseNav = () => {
-        setSelectedProvider(null);
-        setSelectedInstructor(null);
         setSelectedCourse(null);
         setSelectedCourseTopic(null);
+    };
+
+    const resetExamNav = () => {
+        setSelectedExam(null);
+        setSelectedExamYear(null);
+        setSelectedExamSubject(null);
+        setSelectedExamTopic(null);
     };
 
     // Get unique values for hierarchical navigation
@@ -259,12 +286,65 @@ export const BrowseByPathPage: React.FC = () => {
         );
     };
 
+    // Competitive Exam hierarchy
+    const getUniqueExams = () => {
+        const exams = new Set<string>();
+        DEMO_CONTENTS.forEach(c => {
+            if (c.organization.competitiveExamPath) {
+                exams.add(c.organization.competitiveExamPath.exam);
+            }
+        });
+        return Array.from(exams).sort();
+    };
+
+    const getYearsForExam = (exam: string) => {
+        const years = new Set<string>();
+        DEMO_CONTENTS.forEach(c => {
+            if (c.organization.competitiveExamPath?.exam === exam) {
+                years.add(c.organization.competitiveExamPath.year);
+            }
+        });
+        return Array.from(years).sort();
+    };
+
+    const getSubjectsForExamYear = (exam: string, year: string) => {
+        const subjects = new Set<string>();
+        DEMO_CONTENTS.forEach(c => {
+            if (c.organization.competitiveExamPath?.exam === exam &&
+                c.organization.competitiveExamPath?.year === year) {
+                subjects.add(c.organization.competitiveExamPath.subject);
+            }
+        });
+        return Array.from(subjects).sort();
+    };
+
+    const getTopicsForExamSubject = (exam: string, year: string, subject: string) => {
+        const topics = new Set<string>();
+        DEMO_CONTENTS.forEach(c => {
+            if (c.organization.competitiveExamPath?.exam === exam &&
+                c.organization.competitiveExamPath?.year === year &&
+                c.organization.competitiveExamPath?.subject === subject) {
+                topics.add(c.organization.competitiveExamPath.topic);
+            }
+        });
+        return Array.from(topics).sort();
+    };
+
+    const getContentForExamTopic = (exam: string, year: string, subject: string, topic: string) => {
+        return DEMO_CONTENTS.filter(c =>
+            c.organization.competitiveExamPath?.exam === exam &&
+            c.organization.competitiveExamPath?.year === year &&
+            c.organization.competitiveExamPath?.subject === subject &&
+            c.organization.competitiveExamPath?.topic === topic
+        );
+    };
 
     const tabs = [
         { id: 'subject' as BrowseTab, label: 'Subject-wise', icon: BookOpen, color: 'blue', gradient: 'from-blue-500 to-cyan-600' },
         { id: 'university' as BrowseTab, label: 'University-wise', icon: GraduationCap, color: 'blue', gradient: 'from-blue-600 to-indigo-600' },
         { id: 'channel' as BrowseTab, label: 'Channel-wise', icon: Youtube, color: 'blue', gradient: 'from-cyan-500 to-blue-600' },
-        { id: 'course' as BrowseTab, label: 'Course-wise', icon: Folder, color: 'purple', gradient: 'from-purple-500 to-pink-600' }
+        { id: 'course' as BrowseTab, label: 'Course-wise', icon: Folder, color: 'purple', gradient: 'from-purple-500 to-pink-600' },
+        { id: 'competitive_exam' as BrowseTab, label: 'Competitive Exams', icon: Trophy, color: 'amber', gradient: 'from-amber-500 to-orange-600' }
     ];
 
     const currentTab = tabs.find(t => t.id === activeTab)!;
@@ -289,13 +369,20 @@ export const BrowseByPathPage: React.FC = () => {
             if (selectedChannel) crumbs.push({ label: selectedChannel, onClick: () => { setSelectedPlaylist(null); setSelectedChannelTopic(null); } });
             if (selectedPlaylist) crumbs.push({ label: selectedPlaylist, onClick: () => setSelectedChannelTopic(null) });
             if (selectedChannelTopic) crumbs.push({ label: selectedChannelTopic, onClick: () => { } });
-        } else {
+        } else if (activeTab === 'course') {
             // Course breadcrumbs
             crumbs.push({ label: 'Providers', onClick: resetCourseNav });
             if (selectedProvider) crumbs.push({ label: selectedProvider, onClick: () => { setSelectedInstructor(null); setSelectedCourse(null); setSelectedCourseTopic(null); } });
             if (selectedInstructor) crumbs.push({ label: selectedInstructor, onClick: () => { setSelectedCourse(null); setSelectedCourseTopic(null); } });
             if (selectedCourse) crumbs.push({ label: selectedCourse, onClick: () => setSelectedCourseTopic(null) });
             if (selectedCourseTopic) crumbs.push({ label: selectedCourseTopic, onClick: () => { } });
+        } else {
+            // Competitive Exam breadcrumbs
+            crumbs.push({ label: 'Exams', onClick: resetExamNav });
+            if (selectedExam) crumbs.push({ label: selectedExam, onClick: () => { setSelectedExamYear(null); setSelectedExamSubject(null); setSelectedExamTopic(null); } });
+            if (selectedExamYear) crumbs.push({ label: selectedExamYear, onClick: () => { setSelectedExamSubject(null); setSelectedExamTopic(null); } });
+            if (selectedExamSubject) crumbs.push({ label: selectedExamSubject, onClick: () => setSelectedExamTopic(null) });
+            if (selectedExamTopic) crumbs.push({ label: selectedExamTopic, onClick: () => { } });
         }
 
         return (
@@ -373,7 +460,7 @@ export const BrowseByPathPage: React.FC = () => {
 
                 {/* Tabs */}
                 <div className="bg-white rounded-2xl shadow-xl p-2 mb-6 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-5 gap-2">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
@@ -387,6 +474,7 @@ export const BrowseByPathPage: React.FC = () => {
                                         resetUniversityNav();
                                         resetChannelNav();
                                         resetCourseNav();
+                                        resetExamNav();
                                     }}
                                     className={`relative p-4 rounded-xl font-black transition-all duration-300 ${isActive
                                         ? `bg-gradient-to-br ${tab.gradient} text-white shadow-lg scale-105`
@@ -468,7 +556,10 @@ export const BrowseByPathPage: React.FC = () => {
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {getContentForSubtopic(selectedSubject, selectedTopic, selectedSubtopic).map((content, index) => (
                                         <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            <EnhancedContentCard content={content} />
+                                            <EnhancedContentCard
+                                                content={content}
+                                                onClick={() => handleContentClick(content)}
+                                            />
                                         </div>
                                     ))}
                                 </div>
@@ -563,7 +654,10 @@ export const BrowseByPathPage: React.FC = () => {
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {getContentForUniTopic(selectedUniversity, selectedSemester, selectedDepartment, selectedUniSubject, selectedUniTopic).map((content, index) => (
                                         <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            <EnhancedContentCard content={content} />
+                                            <EnhancedContentCard
+                                                content={content}
+                                                onClick={() => handleContentClick(content)}
+                                            />
                                         </div>
                                     ))}
                                 </div>
@@ -626,7 +720,10 @@ export const BrowseByPathPage: React.FC = () => {
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {getContentForChannelTopic(selectedChannel, selectedPlaylist, selectedChannelTopic).map((content, index) => (
                                         <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            <EnhancedContentCard content={content} />
+                                            <EnhancedContentCard
+                                                content={content}
+                                                onClick={() => handleContentClick(content)}
+                                            />
                                         </div>
                                     ))}
                                 </div>
@@ -705,7 +802,93 @@ export const BrowseByPathPage: React.FC = () => {
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {getContentForCourseTopic(selectedProvider, selectedInstructor, selectedCourse, selectedCourseTopic).map((content, index) => (
                                         <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            <EnhancedContentCard content={content} />
+                                            <EnhancedContentCard
+                                                content={content}
+                                                onClick={() => handleContentClick(content)}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* COMPETITIVE EXAMS PATH */}
+                    {activeTab === 'competitive_exam' && (
+                        <>
+                            {!selectedExam && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getUniqueExams().map((exam, index) => (
+                                        <div key={exam} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            {renderCategoryCard(
+                                                exam,
+                                                DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === exam).length,
+                                                () => setSelectedExam(exam),
+                                                'amber',
+                                                'from-amber-500 to-orange-600'
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {selectedExam && !selectedExamYear && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getYearsForExam(selectedExam).map((year, index) => (
+                                        <div key={year} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            {renderCategoryCard(
+                                                year,
+                                                DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === selectedExam && c.organization.competitiveExamPath?.year === year).length,
+                                                () => setSelectedExamYear(year),
+                                                'amber',
+                                                'from-amber-500 to-orange-600'
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {selectedExam && selectedExamYear && !selectedExamSubject && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getSubjectsForExamYear(selectedExam, selectedExamYear).map((subject, index) => (
+                                        <div key={subject} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            {renderCategoryCard(
+                                                subject,
+                                                DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === selectedExam && c.organization.competitiveExamPath?.year === selectedExamYear && c.organization.competitiveExamPath?.subject === subject).length,
+                                                () => setSelectedExamSubject(subject),
+                                                'amber',
+                                                'from-amber-500 to-orange-600'
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {selectedExam && selectedExamYear && selectedExamSubject && !selectedExamTopic && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getTopicsForExamSubject(selectedExam, selectedExamYear, selectedExamSubject).map((topic, index) => (
+                                        <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            {renderCategoryCard(
+                                                topic,
+                                                DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === selectedExam && c.organization.competitiveExamPath?.year === selectedExamYear && c.organization.competitiveExamPath?.subject === selectedExamSubject && c.organization.competitiveExamPath?.topic === topic).length,
+                                                () => setSelectedExamTopic(topic),
+                                                'amber',
+                                                'from-amber-500 to-orange-600'
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {selectedExam && selectedExamYear && selectedExamSubject && selectedExamTopic && (
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {getContentForExamTopic(selectedExam, selectedExamYear, selectedExamSubject, selectedExamTopic).map((content, index) => (
+                                        <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                            <EnhancedContentCard
+                                                content={content}
+                                                // Competitive exams link directly to the note, NOT the course gatekeeper
+                                                onClick={() => navigate(`/note/${content.id}`)}
+                                            />
                                         </div>
                                     ))}
                                 </div>
@@ -721,6 +904,13 @@ export const BrowseByPathPage: React.FC = () => {
                     </p>
                 </div>
             </div>
+
+            <CourseGatekeeperModal
+                isOpen={gatekeeperOpen}
+                onClose={() => setGatekeeperOpen(false)}
+                courseName={selectedGatedContent?.organization.coursePath?.courseName || ''}
+                provider={selectedGatedContent?.organization.coursePath?.provider || 'Coursera'}
+            />
         </div>
     );
 };

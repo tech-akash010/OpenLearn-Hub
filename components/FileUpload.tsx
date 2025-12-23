@@ -36,7 +36,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         setIsDragging(true);
     };
 
-    const handleDragLeave = () => {
+    const handleDragLeave = (e: React.DragEvent) => {
+        if (e.relatedTarget && (e.currentTarget.contains(e.relatedTarget as Node) || e.currentTarget === e.relatedTarget)) {
+            return;
+        }
         setIsDragging(false);
     };
 

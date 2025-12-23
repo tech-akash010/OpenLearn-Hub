@@ -140,6 +140,54 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
   const [filteredTopics, setFilteredTopics] = useState(INITIAL_TOPICS);
   const [filteredSubtopics, setFilteredSubtopics] = useState(INITIAL_SUBTOPICS);
 
+  // Drag and Drop State
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const [isDraggingPdf, setIsDraggingPdf] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent, type: 'image' | 'pdf') => {
+    e.preventDefault();
+    if (type === 'image') setIsDraggingImage(true);
+    else setIsDraggingPdf(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent, type: 'image' | 'pdf') => {
+    e.preventDefault();
+    if (e.relatedTarget && (e.currentTarget.contains(e.relatedTarget as Node) || e.currentTarget === e.relatedTarget)) {
+      return;
+    }
+    if (type === 'image') setIsDraggingImage(false);
+    else setIsDraggingPdf(false);
+  };
+
+  const handleDrop = (e: React.DragEvent, type: 'image' | 'pdf') => {
+    e.preventDefault();
+    if (type === 'image') setIsDraggingImage(false);
+    else setIsDraggingPdf(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      if (type === 'image' && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setSelection(prev => ({ ...prev, attachedImage: reader.result as string }));
+        };
+        reader.readAsDataURL(file);
+      } else if (type === 'pdf' && file.type === 'application/pdf') {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setSelection(prev => ({
+            ...prev,
+            attachedPdf: {
+              name: file.name,
+              data: reader.result as string
+            }
+          }));
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
   useEffect(() => {
     setFilteredTopics(INITIAL_TOPICS.filter(t => t.subjectId === selection.subject));
     if (selection.subject) {
@@ -398,7 +446,13 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                       {!selection.attachedImage ? (
                         <div
                           onClick={() => fileInputRef.current?.click()}
-                          className="group relative h-40 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all overflow-hidden"
+                          onDragOver={(e) => handleDragOver(e, 'image')}
+                          onDragLeave={(e) => handleDragLeave(e, 'image')}
+                          onDrop={(e) => handleDrop(e, 'image')}
+                          className={`group relative h-40 border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden ${isDraggingImage
+                            ? 'border-indigo-500 bg-indigo-50 shadow-inner'
+                            : 'border-gray-200 hover:border-indigo-400 hover:bg-indigo-50/30'
+                            }`}
                         >
                           <input
                             type="file"
@@ -438,7 +492,13 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                       {!selection.attachedPdf ? (
                         <div
                           onClick={() => pdfInputRef.current?.click()}
-                          className="group relative h-40 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-all overflow-hidden"
+                          onDragOver={(e) => handleDragOver(e, 'pdf')}
+                          onDragLeave={(e) => handleDragLeave(e, 'pdf')}
+                          onDrop={(e) => handleDrop(e, 'pdf')}
+                          className={`group relative h-40 border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden ${isDraggingPdf
+                            ? 'border-emerald-500 bg-emerald-50 shadow-inner'
+                            : 'border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/30'
+                            }`}
                         >
                           <input
                             type="file"

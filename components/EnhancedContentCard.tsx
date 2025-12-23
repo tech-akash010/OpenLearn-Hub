@@ -75,6 +75,20 @@ export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
                         </div>
                     </div>
                 )}
+
+                {/* Competitive Exam Path */}
+                {organization.competitiveExamPath && (
+                    <div className="flex items-start space-x-2">
+                        <div className="text-amber-600 flex-shrink-0 mt-0.5">🏆</div>
+                        <div className="flex items-center space-x-1 text-xs font-medium text-amber-900 flex-wrap">
+                            <span>{organization.competitiveExamPath.exam}</span>
+                            <span className="text-amber-400">›</span>
+                            <span>{organization.competitiveExamPath.year}</span>
+                            <span className="text-amber-400">›</span>
+                            <span>{organization.competitiveExamPath.subject}</span>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Footer */}

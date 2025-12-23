@@ -26,6 +26,30 @@ export const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onComplete, 
         authorizedEmails: [] as string[]
     });
 
+    const [isDragging, setIsDragging] = useState(false);
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        if (e.relatedTarget && (e.currentTarget.contains(e.relatedTarget as Node) || e.currentTarget === e.relatedTarget)) {
+            return;
+        }
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) {
+            setFormData({ ...formData, file });
+        }
+    };
+
     const user = authService.getUser();
     const platforms = ['Coursera', 'Udemy', 'YouTube', 'edX', 'Khan Academy', 'Other'];
 
@@ -294,9 +318,15 @@ export const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onComplete, 
                                 />
                                 <label
                                     htmlFor="course-file-upload"
-                                    className="block border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-purple-500 transition-colors cursor-pointer"
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    className={`block border-2 border-dashed rounded-2xl p-12 text-center transition-colors cursor-pointer ${isDragging
+                                            ? 'border-purple-600 bg-purple-50 shadow-inner'
+                                            : 'border-gray-300 hover:border-purple-500'
+                                        }`}
                                 >
-                                    <Upload size={48} className="mx-auto text-gray-400 mb-4" />
+                                    <Upload size={48} className={`mx-auto mb-4 ${isDragging ? 'text-purple-600 animate-bounce' : 'text-gray-400'}`} />
                                     <p className="font-bold text-gray-700 mb-2">
                                         {formData.file ? formData.file.name : 'Click to upload or drag and drop'}
                                     </p>

@@ -141,32 +141,33 @@ export const HubExplorer: React.FC = () => {
       </section>
 
       {/* Stats Quick-Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 mb-12">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20 mt-12">
         {[
           { label: 'Total Subjects', value: '18', icon: <Layers size={18} /> },
           { label: 'Active Learners', value: '42.5k', icon: <Users size={18} /> },
           { label: 'Verified Topics', value: '1,240', icon: <BookOpen size={18} /> },
           { label: 'Community Syncs', value: '180k', icon: <TrendingUp size={18} /> },
         ].map((stat, i) => (
-          <div key={i} className="flex items-center space-x-4 p-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="p-3 bg-gray-50 text-gray-400 rounded-2xl">{stat.icon}</div>
+          <div key={i} className="flex items-center gap-6 p-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-4 bg-gray-50 text-gray-400 rounded-2xl">{stat.icon}</div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
-              <p className="text-2xl font-black text-gray-900">{stat.value}</p>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">{stat.label}</p>
+              <p className="text-3xl font-black text-gray-900">{stat.value}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Subjects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* Subjects Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         {filteredSubjects.map((subject) => (
           <Link
             key={subject.id}
             to={`/hub/subject/${subject.id}`}
             className="group bg-white rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:border-blue-200 transition-all duration-500 flex flex-col overflow-hidden"
           >
-            <div className="p-10">
+            <div className="p-12">
               <div className="flex items-center justify-between mb-10">
                 <div className={`p-5 rounded-[1.5rem] transition-all duration-500 ${subject.icon === 'Cpu' ? 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600' :
                   subject.icon === 'Layers' ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-600' :
@@ -182,14 +183,14 @@ export const HubExplorer: React.FC = () => {
                 </div>
               </div>
 
-              <h3 className="text-3xl font-black text-gray-900 mb-4 group-hover:text-blue-600 transition-colors tracking-tight">
+              <h3 className="text-3xl font-black text-gray-900 mb-6 group-hover:text-blue-600 transition-colors tracking-tight">
                 {subject.name}
               </h3>
-              <p className="text-gray-500 font-medium leading-relaxed mb-8 h-12 line-clamp-2">
+              <p className="text-gray-500 font-medium leading-relaxed mb-10 h-12 line-clamp-2">
                 {subject.description}
               </p>
 
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center gap-8">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Topics</span>
                   <span className="text-lg font-black text-gray-900">24</span>
@@ -202,7 +203,7 @@ export const HubExplorer: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-auto p-8 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between group-hover:bg-blue-50/50 transition-colors">
+            <div className="mt-auto p-10 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between group-hover:bg-blue-50/50 transition-colors">
               <span className="text-xs font-black text-gray-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">
                 Drill Down Hierarchy
               </span>
@@ -230,12 +231,20 @@ export const HubExplorer: React.FC = () => {
               {canUploadNotes ? <Plus size={36} /> : <Lock size={36} />}
             </div>
             <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">
-              {canUploadNotes ? 'Missing a Subject?' : 'Locked - Silver+ Only'}
+              {canUploadNotes
+                ? 'Missing a Subject?'
+                : user?.role === 'community_contributor'
+                  ? 'Locked - Silver+ Only'
+                  : 'Verification Required'
+              }
             </h3>
             <p className="text-gray-500 font-medium max-w-[240px] mb-8 leading-relaxed text-sm">
               {canUploadNotes
                 ? 'Help expand the hub by proposing a new top-level field of study.'
-                : 'Reach Silver level to propose new subjects and contribute.'}
+                : user?.role === 'community_contributor'
+                  ? 'Reach Silver level to propose new subjects and contribute.'
+                  : 'Verify your student profile to unlock contribution features.'
+              }
             </p>
             {canUploadNotes && (
               <div className="text-blue-600 font-black text-xs uppercase tracking-widest flex items-center">

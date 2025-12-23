@@ -186,7 +186,7 @@ export interface ContentSourceMetadata {
 }
 
 // Multi-Path Content Organization Types
-export type OrganizationPath = 'subject' | 'university' | 'channel' | 'course';
+export type OrganizationPath = 'subject' | 'university' | 'channel' | 'course' | 'competitive_exam';
 
 export interface SubjectPath {
   subject: string;
@@ -218,11 +218,20 @@ export interface CoursePath {
   resourceTitle: string;
 }
 
+export interface CompetitiveExamPath {
+  exam: string; // e.g., JEE Advanced, NEET, GATE, UPSC
+  year: string; // e.g., Target 2025, 2024 PYQ, General
+  subject: string; // e.g., Physics, Maths, General Studies
+  topic: string; // e.g., Rotational Motion, Algebra
+  resourceTitle: string;
+}
+
 export interface ContentOrganization {
   subjectPath?: SubjectPath;
   universityPath?: UniversityPath;
   channelPath?: ChannelPath;
   coursePath?: CoursePath;
+  competitiveExamPath?: CompetitiveExamPath;
   primaryPath: OrganizationPath | 'course';
 }
 

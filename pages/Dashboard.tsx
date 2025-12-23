@@ -22,9 +22,10 @@ import {
   Lock,
   Folder
 } from 'lucide-react';
+import { driveSyncService } from '../services/driveSyncService';
 import { authService } from '../services/authService';
 import { AuthRequiredModal } from '../components/AuthRequiredModal';
-import { User } from '../types';
+import { User, DriveItem } from '../types';
 
 // Helper Components
 interface ActionCardProps {
@@ -110,6 +111,15 @@ export const Dashboard: React.FC = () => {
   const user = authService.getUser();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalFeature, setAuthModalFeature] = useState('');
+  const [driveItems, setDriveItems] = useState<DriveItem[]>([]);
+
+  React.useEffect(() => {
+    setDriveItems(driveSyncService.getDriveItems());
+
+    const handleSync = () => setDriveItems(driveSyncService.getDriveItems());
+    window.addEventListener('drive-sync', handleSync);
+    return () => window.removeEventListener('drive-sync', handleSync);
+  }, []);
 
   const handleRestrictedAction = (feature: string, path: string) => {
     if (!user) {
@@ -320,10 +330,30 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="grid md:grid-cols-4 gap-4">
             {[
-              { label: 'Community Uploads', count: 2, color: 'blue', icon: <Upload size={20} /> },
-              { label: 'Course Uploads', count: 1, color: 'purple', icon: <Lock size={20} /> },
-              { label: 'Community Downloads', count: 5, color: 'green', icon: <Download size={20} /> },
-              { label: 'Course Downloads', count: 3, color: 'orange', icon: <HardDrive size={20} /> }
+              {
+                label: 'Community Uploads',
+                count: driveItems.filter(i => i.source === 'uploaded').length,
+                color: 'blue',
+                icon: <Upload size={20} />
+              },
+              {
+                label: 'Course Uploads',
+                count: 0,
+                color: 'purple',
+                icon: <Lock size={20} />
+              },
+              {
+                label: 'Community Downloads',
+                count: driveItems.filter(i => i.source === 'downloaded').length,
+                color: 'green',
+                icon: <Download size={20} />
+              },
+              {
+                label: 'Course Downloads',
+                count: 0,
+                color: 'orange',
+                icon: <HardDrive size={20} />
+              }
             ].map((category, idx) => (
               <div key={idx} className={`bg-white rounded-2xl p-6 border-2 border-${category.color}-100 hover:border-${category.color}-300 transition-all cursor-pointer`}>
                 <div className={`w-12 h-12 bg-${category.color}-100 rounded-xl flex items-center justify-center mb-4 text-${category.color}-600`}>

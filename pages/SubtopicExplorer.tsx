@@ -83,30 +83,43 @@ export const SubtopicExplorer: React.FC = () => {
           <button
             disabled={!canContribute}
             className={`w-full rounded-[2rem] border-2 border-dashed p-6 flex flex-col items-center justify-center text-center min-h-[220px] transition-all ${canContribute
-                ? 'bg-gray-50/50 border-gray-200 hover:bg-white hover:border-indigo-300 cursor-pointer'
-                : 'bg-gray-100/50 border-gray-300 cursor-not-allowed opacity-60'
+              ? 'bg-gray-50/50 border-gray-200 hover:bg-white hover:border-indigo-300 cursor-pointer'
+              : 'bg-gray-100/50 border-gray-300 cursor-not-allowed opacity-60'
               }`}
           >
             <div className={`w-14 h-14 rounded-full border flex items-center justify-center mb-4 shadow-sm transition-all ${canContribute
-                ? 'bg-white border-gray-100 group-hover:bg-indigo-600 group-hover:text-white'
-                : 'bg-gray-200 border-gray-300 text-gray-500'
+              ? 'bg-white border-gray-100 group-hover:bg-indigo-600 group-hover:text-white'
+              : 'bg-gray-200 border-gray-300 text-gray-500'
               }`}>
               {canContribute ? <Plus size={24} /> : <Lock size={24} />}
             </div>
             <h4 className="text-lg font-bold text-gray-900 mb-1">
-              {canContribute ? 'New Subtopic' : 'Locked - Silver+ Only'}
+              {canContribute
+                ? 'New Subtopic'
+                : user?.role === 'community_contributor'
+                  ? 'Locked - Silver+ Only'
+                  : 'Verification Required'
+              }
             </h4>
             <p className="text-xs text-gray-400 max-w-[180px]">
               {canContribute
                 ? 'Define a specific niche within this topic area.'
-                : 'Reach Silver level to add subtopics.'}
+                : user?.role === 'community_contributor'
+                  ? 'Reach Silver level to add subtopics.'
+                  : 'Verify your profile to add new subtopics.'
+              }
             </p>
           </button>
-          {!canContribute && isBronze && (
+          {!canContribute && user && (
             <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-gray-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-10 font-medium">
               <div className="flex items-start space-x-2">
                 <Info size={14} className="flex-shrink-0 mt-0.5" />
-                <span>Bronze contributors cannot add subtopics. Reach Silver level (40+ trust score) through community engagement.</span>
+                <span>
+                  {user?.role === 'community_contributor'
+                    ? 'Bronze contributors cannot add subtopics. Reach Silver level (40+ trust score) through community engagement.'
+                    : 'You must complete profile verification before contributing new subtopics.'
+                  }
+                </span>
               </div>
             </div>
           )}

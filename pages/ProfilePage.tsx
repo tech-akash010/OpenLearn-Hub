@@ -226,7 +226,7 @@ export const ProfilePage: React.FC = () => {
                 </div>
                 <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Active Drive</span>
               </div>
-              <p className="text-3xl font-black text-gray-900 mb-1">Google Drive</p>
+              <p className="text-3xl font-black text-gray-900 mb-1">My Drive</p>
               <p className="text-sm text-gray-500 font-bold uppercase tracking-widest text-[10px]">Primary Storage Provider</p>
               <div className="mt-6 flex items-center text-xs text-emerald-600 font-black uppercase tracking-widest">
                 <CheckCircle2 size={14} className="mr-1.5" /> Fully Synced
