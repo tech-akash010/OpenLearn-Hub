@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, GraduationCap, Youtube, Eye, ThumbsUp, MessageSquare, Star } from 'lucide-react';
+import { BookOpen, GraduationCap, Youtube, Eye, ThumbsUp, MessageSquare, Star, Download, ShieldCheck, Tag } from 'lucide-react';
 import { DemoContent } from '../data/demoContents';
 
 interface EnhancedContentCardProps {
@@ -25,9 +25,19 @@ export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
             className="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-blue-300 hover:shadow-xl transition-all cursor-pointer group"
         >
             {/* Title */}
-            <h3 className="font-black text-gray-900 text-lg mb-2 group-hover:text-blue-600 transition-colors">
-                {title}
-            </h3>
+            <div className="flex justify-between items-start mb-2">
+                <h3 className="font-black text-gray-900 text-lg group-hover:text-blue-600 transition-colors flex-1 pr-2">
+                    {title}
+                </h3>
+                <div className="flex items-center space-x-1 bg-green-50 px-2 py-1 rounded-full text-[10px] font-bold text-green-700 border border-green-200 shrink-0">
+                    <ShieldCheck size={10} />
+                    {(organization.universityPath || organization.coursePath) ? (
+                        <span>Course</span>
+                    ) : (
+                        <span>Free</span>
+                    )}
+                </div>
+            </div>
 
             {/* Description */}
             <p className="text-sm text-gray-600 font-medium mb-4 line-clamp-2">
@@ -93,11 +103,11 @@ export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
 
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="flex items-center space-x-2 text-xs text-gray-500">
+                <div className="flex items-center space-x-2 text-xs text-gray-500 hover:text-blue-600 transition-colors cursor-pointer" onClick={(e) => { e.stopPropagation(); /* Navigate to profile */ }}>
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs">
                         {uploadedBy.charAt(0)}
                     </div>
-                    <span className="font-medium">{uploadedBy}</span>
+                    <span className="font-medium underline decoration-dotted underline-offset-2">{uploadedBy}</span>
                 </div>
 
                 <div className="flex items-center space-x-4 text-xs text-gray-500">
@@ -113,6 +123,12 @@ export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
                         <MessageSquare size={14} />
                         <span className="font-medium">{comments}</span>
                     </div>
+                    {content.downloads && (
+                        <div className="flex items-center space-x-1 hover:text-green-600 transition-colors cursor-pointer">
+                            <Download size={14} className="text-green-600" />
+                            <span className="font-medium">{content.downloads}</span>
+                        </div>
+                    )}
                     <div className="flex items-center space-x-1">
                         <Star size={14} className="fill-amber-400 text-amber-400" />
                         <span className="font-medium">{averageRating.toFixed(1)}</span>

@@ -217,6 +217,13 @@ export const Dashboard: React.FC = () => {
               enabled={true}
             />
             <ActionCard
+              icon={<TrendingUp />}
+              title="Trending Notes"
+              description="Popular & Recent"
+              onClick={() => navigate('/trending')}
+              enabled={true}
+            />
+            <ActionCard
               icon={<MessageSquare />}
               title="Chat with Notes"
               description="AI-powered assistance"
@@ -283,6 +290,13 @@ export const Dashboard: React.FC = () => {
               title="Browse Notes"
               description="Explore study materials"
               onClick={() => navigate('/browse')}
+              enabled={true}
+            />
+            <ActionCard
+              icon={<TrendingUp />}
+              title="Trending Notes"
+              description="Popular & Recent"
+              onClick={() => navigate('/trending')}
               enabled={true}
             />
             <ActionCard

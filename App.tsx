@@ -12,6 +12,7 @@ import { CourseNoteAccessPage } from './pages/CourseNoteAccessPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { VerificationPage } from './pages/VerificationPage';
+import { TrendingNotesPage } from './pages/TrendingNotesPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AIChatPage } from './pages/AIChatPage';
 import { QuizCreationPage } from './pages/QuizCreationPage';
@@ -93,6 +94,7 @@ const App: React.FC = () => {
 
           {/* Browse - Accessible to guests */}
           <Route path="/browse" element={<BrowseByPathPage />} />
+          <Route path="/trending" element={<TrendingNotesPage />} />
           <Route path="/note/:noteId" element={<SharedNotePage />} />
 
           <Route path="/contribute" element={

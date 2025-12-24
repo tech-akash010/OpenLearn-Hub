@@ -9,6 +9,7 @@ export interface DemoContent {
     uploadedAt: string;
     views: number;
     likes: number;
+    downloads: number;
 }
 
 export const DEMO_CONTENTS: DemoContent[] = [
@@ -48,7 +49,8 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Rahul Kumar',
         uploadedAt: '2024-01-15T10:30:00Z',
         views: 1250,
-        likes: 89
+        likes: 89,
+        downloads: 342
     },
     {
         id: 'content_2',
@@ -86,7 +88,8 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Priya Sharma',
         uploadedAt: '2024-01-18T14:20:00Z',
         views: 2100,
-        likes: 156
+        likes: 156,
+        downloads: 567
     },
     {
         id: 'content_3',
@@ -117,7 +120,8 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Amit Patel',
         uploadedAt: '2024-01-20T09:15:00Z',
         views: 3400,
-        likes: 245
+        likes: 245,
+        downloads: 890
     },
     {
         id: 'content_4',
@@ -155,7 +159,8 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Sneha Reddy',
         uploadedAt: '2024-01-22T11:45:00Z',
         views: 1890,
-        likes: 134
+        likes: 134,
+        downloads: 410
     },
     {
         id: 'content_5',
@@ -193,7 +198,8 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Vikram Singh',
         uploadedAt: '2024-01-25T16:00:00Z',
         views: 2750,
-        likes: 198
+        likes: 198,
+        downloads: 620
     },
     {
         id: 'content_6',
@@ -231,7 +237,8 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Ananya Gupta',
         uploadedAt: '2024-01-28T13:30:00Z',
         views: 4200,
-        likes: 312
+        likes: 312,
+        downloads: 1200
     },
     {
         id: 'content_7',
@@ -262,7 +269,8 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Rohan Verma',
         uploadedAt: '2024-02-01T10:00:00Z',
         views: 3100,
-        likes: 267
+        likes: 267,
+        downloads: 945
     },
     {
         id: 'content_8',
@@ -307,7 +315,8 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Kavya Iyer',
         uploadedAt: '2024-02-03T15:20:00Z',
         views: 2890,
-        likes: 201
+        likes: 201,
+        downloads: 730
     },
     {
         id: 'content_9',
@@ -326,7 +335,8 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Amit Kumar',
         uploadedAt: '2024-02-10T09:00:00Z',
         views: 1500,
-        likes: 120
+        likes: 120,
+        downloads: 280
     },
     {
         id: 'content_10',
@@ -345,6 +355,7 @@ export const DEMO_CONTENTS: DemoContent[] = [
         uploadedBy: 'Dr. Neha Gupta',
         uploadedAt: '2024-02-12T11:30:00Z',
         views: 2200,
-        likes: 180
+        likes: 180,
+        downloads: 450
     }
 ];
