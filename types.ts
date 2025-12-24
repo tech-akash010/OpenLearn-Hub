@@ -319,7 +319,10 @@ export interface UserStats {
 
 export interface ChatMessage {
   role: 'user' | 'model' | 'system';
-  parts: { text: string }[];
+  parts: (
+    | { text: string }
+    | { inlineData: { mimeType: string; data: string } }
+  )[];
 }
 
 export interface ChatContext {
