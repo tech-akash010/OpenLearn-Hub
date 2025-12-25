@@ -65,7 +65,24 @@ export const CourseGatekeeperModal: React.FC<CourseGatekeeperModalProps> = ({
 
                     <div className="space-y-4">
                         <a
-                            href={`https://www.coursera.org/search?query=${encodeURIComponent(courseName)}`}
+                            href={(() => {
+                                const query = encodeURIComponent(courseName);
+                                switch (provider.toLowerCase()) {
+                                    case 'udemy':
+                                        return `https://www.udemy.com/courses/search/?q=${query}`;
+                                    case 'coursera':
+                                        return `https://www.coursera.org/search?query=${query}`;
+                                    case 'youtube':
+                                        return `https://www.youtube.com/results?search_query=${query}`;
+                                    case 'nptel':
+                                    case 'swayam':
+                                        return `https://onlinecourses.nptel.ac.in/noc/search?q=${query}`;
+                                    case 'edx':
+                                        return `https://www.edx.org/search?q=${query}`;
+                                    default:
+                                        return `https://www.coursera.org/search?query=${query}`;
+                                }
+                            })()}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full group flex items-center justify-between p-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all hover:shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5"

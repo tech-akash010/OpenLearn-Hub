@@ -23,7 +23,9 @@ import { driveSyncService } from '../services/driveSyncService';
 import { geminiService } from '../services/geminiService';
 import { interactionService } from '../services/interactionService';
 import { authService } from '../services/authService';
+import { subscriptionService } from '../services/subscriptionService';
 import { ContentInteraction } from '../types';
+import { FollowButton } from '../components/FollowButton';
 
 export const ContentDetail: React.FC = () => {
   const { subjectId, topicId, subtopicId } = useParams<{ subjectId: string, topicId: string, subtopicId: string }>();
@@ -182,9 +184,23 @@ export const ContentDetail: React.FC = () => {
                       <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-blue-100">
                         {item.author.charAt(0).toUpperCase()}
                       </div>
-                      <div>
-                        <h4 className="font-black text-gray-900 text-xl leading-tight">{item.author}</h4>
-                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Verified Expert • Updated {item.lastUpdated}</p>
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <h4 className="font-black text-gray-900 text-xl leading-tight">{item.author}</h4>
+                          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Verified Expert • Updated {item.lastUpdated}</p>
+                        </div>
+                        {(() => {
+                          const creator = subscriptionService.getCreatorByUploaderName(item.author);
+                          return creator && (
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <FollowButton
+                                creatorId={creator.id}
+                                creatorName={creator.name}
+                                variant="compact"
+                              />
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">

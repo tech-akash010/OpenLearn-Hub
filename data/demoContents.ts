@@ -357,5 +357,182 @@ export const DEMO_CONTENTS: DemoContent[] = [
         views: 2200,
         likes: 180,
         downloads: 450
+    },
+    {
+        id: 'content_11',
+        title: 'JavaScript Async/Await Masterclass',
+        description: 'Understanding promises, async functions, and error handling in modern JavaScript',
+        organization: {
+            primaryPath: 'subject',
+            subjectPath: {
+                subject: 'Computer Science',
+                coreTopic: 'Web Development',
+                subtopic: 'JavaScript',
+                resourceTitle: 'Async/Await Guide'
+            },
+            channelPath: {
+                channelName: 'Traversy Media',
+                playlistName: 'Modern JavaScript',
+                topic: 'Async Programming',
+                resourceTitle: 'Async/Await Tutorial'
+            }
+        },
+        uploadedBy: 'Vikram Singh',
+        uploadedAt: '2024-02-15T10:00:00Z',
+        views: 3100,
+        likes: 267,
+        downloads: 720
+    },
+    {
+        id: 'content_12',
+        title: 'Machine Learning Basics',
+        description: 'Introduction to ML concepts, supervised and unsupervised learning',
+        organization: {
+            primaryPath: 'subject',
+            subjectPath: {
+                subject: 'Computer Science',
+                coreTopic: 'Artificial Intelligence',
+                subtopic: 'Machine Learning',
+                resourceTitle: 'ML Fundamentals'
+            }
+        },
+        uploadedBy: 'Ananya Gupta',
+        uploadedAt: '2024-02-16T15:30:00Z',
+        views: 4200,
+        likes: 312,
+        downloads: 890
+    },
+    {
+        id: 'content_13',
+        title: 'Calculus - Integration Techniques',
+        description: 'Integration by parts, substitution, and partial fractions explained',
+        organization: {
+            primaryPath: 'subject',
+            subjectPath: {
+                subject: 'Mathematics',
+                coreTopic: 'Calculus',
+                subtopic: 'Integration',
+                resourceTitle: 'Integration Methods'
+            },
+            channelPath: {
+                channelName: 'Khan Academy',
+                playlistName: 'Calculus',
+                topic: 'Integration',
+                resourceTitle: 'Integration Techniques'
+            }
+        },
+        uploadedBy: 'Rohan Mehta',
+        uploadedAt: '2024-02-17T08:45:00Z',
+        views: 2800,
+        likes: 198,
+        downloads: 560
+    },
+    {
+        id: 'content_14',
+        title: 'React Hooks Complete Guide',
+        description: 'useState, useEffect, useContext, and custom hooks explained',
+        organization: {
+            primaryPath: 'channel',
+            subjectPath: {
+                subject: 'Computer Science',
+                coreTopic: 'Web Development',
+                subtopic: 'React',
+                resourceTitle: 'React Hooks'
+            },
+            channelPath: {
+                channelName: 'CodeWithHarry',
+                playlistName: 'React Tutorial',
+                topic: 'React Hooks',
+                resourceTitle: 'Hooks Deep Dive'
+            }
+        },
+        uploadedBy: 'Rohan Verma',
+        uploadedAt: '2024-02-18T12:00:00Z',
+        views: 3100,
+        likes: 267,
+        downloads: 945
+    },
+    {
+        id: 'content_15',
+        title: 'Thermodynamics Laws & Applications',
+        description: 'First, second, and third laws of thermodynamics with real-world examples',
+        organization: {
+            primaryPath: 'subject',
+            subjectPath: {
+                subject: 'Physics',
+                coreTopic: 'Thermodynamics',
+                subtopic: 'Laws',
+                resourceTitle: 'Thermo Laws Explained'
+            }
+        },
+        uploadedBy: 'Priya Krishnan',
+        uploadedAt: '2024-02-19T09:20:00Z',
+        views: 1900,
+        likes: 145,
+        downloads: 380
+    },
+    {
+        id: 'content_16',
+        title: 'SQL Queries - Joins & Subqueries',
+        description: 'Master INNER, LEFT, RIGHT, and FULL OUTER joins with practical examples',
+        organization: {
+            primaryPath: 'subject',
+            subjectPath: {
+                subject: 'Computer Science',
+                coreTopic: 'Database Systems',
+                subtopic: 'SQL',
+                resourceTitle: 'SQL Joins Guide'
+            },
+            channelPath: {
+                channelName: 'freeCodeCamp',
+                playlistName: 'SQL Tutorial',
+                topic: 'Advanced Queries',
+                resourceTitle: 'Joins and Subqueries'
+            }
+        },
+        uploadedBy: 'Karan Malhotra',
+        uploadedAt: '2024-02-20T14:15:00Z',
+        views: 2700,
+        likes: 203,
+        downloads: 615
+    },
+    {
+        id: 'content_17',
+        title: 'Electrochemistry - Galvanic Cells',
+        description: 'Electrode potentials, Nernst equation, and battery applications',
+        organization: {
+            primaryPath: 'competitive_exam',
+            competitiveExamPath: {
+                exam: 'JEE',
+                year: 'Target 2025',
+                subject: 'Chemistry',
+                topic: 'Electrochemistry',
+                resourceTitle: 'Galvanic Cells Notes'
+            }
+        },
+        uploadedBy: 'Sneha Reddy',
+        uploadedAt: '2024-02-21T10:30:00Z',
+        views: 1890,
+        likes: 134,
+        downloads: 410
+    },
+    {
+        id: 'content_18',
+        title: 'Linear Algebra - Eigenvalues',
+        description: 'Computing eigenvalues, eigenvectors, and diagonalization',
+        organization: {
+            primaryPath: 'subject',
+            subjectPath: {
+                subject: 'Mathematics',
+                coreTopic: 'Linear Algebra',
+                subtopic: 'Eigenvalues',
+                resourceTitle: 'Eigenvalue Computations'
+            }
+        },
+        uploadedBy: 'Arjun Kapoor',
+        uploadedAt: '2024-02-22T11:45:00Z',
+        views: 2300,
+        likes: 176,
+        downloads: 520
     }
 ];

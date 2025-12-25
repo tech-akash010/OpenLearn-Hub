@@ -20,6 +20,7 @@ import { NoteUploadPage } from './pages/NoteUploadPage';
 import { BrowseByPathPage } from './pages/BrowseByPathPage';
 import { SharedNotePage } from './pages/SharedNotePage';
 import { ContributionPage } from './pages/ContributionPage';
+import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { authService } from './services/authService';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -97,12 +98,18 @@ const App: React.FC = () => {
           <Route path="/trending" element={<TrendingNotesPage />} />
           <Route path="/note/:noteId" element={<SharedNotePage />} />
 
+          {/* Subscriptions - Requires authentication */}
+          <Route path="/subscriptions" element={
+            <PrivateRoute>
+              <SubscriptionsPage />
+            </PrivateRoute>
+          } />
+
           <Route path="/contribute" element={
             <PrivateRoute>
               <ContributionPage />
             </PrivateRoute>
           } />
-          <Route path="/heatmap" element={<div className="p-8"><h1 className="text-3xl font-bold">Comprehensive Heatmap Coming Soon</h1></div>} />
           <Route path="/leaderboard" element={<div className="p-8"><h1 className="text-3xl font-bold">Top Contributors Coming Soon</h1></div>} />
           <Route path="/settings" element={<div className="p-8"><h1 className="text-3xl font-bold">Settings & Integration</h1></div>} />
         </Routes>

@@ -1,6 +1,6 @@
 {
   "name": "OpenLearn Hub",
-  "description": "A community-driven learning resource platform with AI-powered smart notes integration for Google Drive.",
+  "description": "A community-driven learning resource platform with AI-powered smart notes integration for passionate educators and students.",
   "requestFramePermissions": [
     "camera",
     "microphone"

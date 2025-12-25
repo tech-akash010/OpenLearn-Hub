@@ -368,3 +368,62 @@ export interface ContentInteraction {
   averageRating: number;
   totalReviews: number;
 }
+
+// Follow/Subscription Types
+export type FollowableRole = 'teacher' | 'online_educator';
+
+export interface FollowableCreator {
+  id: string;
+  name: string;
+  avatar?: string;
+  role: UserRole;
+  verificationStatus: VerificationStatus;
+  verificationLevel: VerificationLevel;
+  institution?: string; // For teachers: university name
+  channelName?: string; // For online educators: channel/platform
+  totalNotes: number;
+  totalCourseNotes: number;
+  averageRating: number;
+  followerCount: number;
+  reputation: number;
+  communityMetrics?: CommunityMetrics; // For community contributors
+}
+
+export interface Subscription {
+  id: string;
+  userId: string; // The follower
+  creatorId: string; // The followed creator
+  followedAt: string;
+}
+
+export interface CreatorNotesGroup {
+  topic: string;
+  notes: CreatorNote[];
+}
+
+export interface CreatorNote {
+  id: string;
+  title: string;
+  subject: string;
+  topic: string;
+  subtopic?: string;
+  uploadedAt: string;
+  isCourseNote: boolean;
+  courseId?: string;
+  previewAvailable: boolean;
+}
+
+export interface SubscriptionCreatorView {
+  creator: FollowableCreator;
+  communityNotes: CreatorNotesGroup[];
+  courseNotes: CreatorNotesGroup[];
+  totalCommunityNotes: number;
+  totalCourseNotes: number;
+}
+
+// Follow eligibility check
+export interface FollowEligibility {
+  canBeFollowed: boolean;
+  reason?: string;
+  badge: 'verified_teacher' | 'online_educator' | 'trusted_contributor' | 'none';
+}

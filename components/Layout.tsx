@@ -18,7 +18,8 @@ import {
   FileQuestion,
   Compass,
   HardDrive,
-  TrendingUp
+  TrendingUp,
+  Users
 } from 'lucide-react';
 import { authService } from '../services/authService';
 import { AuthRequiredModal } from './AuthRequiredModal';
@@ -102,12 +103,21 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
             <NavItem to="/" icon={<Home size={20} />} label="Dashboard" active={location.pathname === '/'} />
             <NavItem to="/trending" icon={<TrendingUp size={20} />} label="Trending Notes" active={location.pathname === '/trending'} />
+
+            {/* Subscriptions - require auth */}
+            {user ? (
+              <NavItem to="/subscriptions" icon={<Users size={20} />} label="Subscriptions" active={location.pathname === '/subscriptions'} />
+            ) : (
+              <div onClick={(e) => handleRestrictedClick(e, 'Subscriptions')}>
+                <NavItem to="#" icon={<Users size={20} />} label="Subscriptions" active={false} />
+              </div>
+            )}
+
             <NavItem to="/hub" icon={<BookOpen size={20} />} label="Community Notes" active={location.pathname.startsWith('/hub')} />
 
             {/* Accessible to all - guests can browse */}
             <NavItem to="/my-drive" icon={<HardDrive size={20} />} label="My Drive" active={location.pathname === '/my-drive'} />
             <NavItem to="/browse" icon={<Compass size={20} />} label="Browse Paths" active={location.pathname === '/browse'} />
-            <NavItem to="/heatmap" icon={<PieChart size={20} />} label="Topic Heatmap" active={location.pathname === '/heatmap'} />
             <NavItem to="/leaderboard" icon={<Award size={20} />} label="Contributors" active={location.pathname === '/leaderboard'} />
 
             {/* Restricted features - require auth */}
@@ -205,7 +215,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-[1600px] mx-auto">
             {children}
           </div>
         </div>
