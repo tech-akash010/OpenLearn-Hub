@@ -189,30 +189,126 @@ vercel deploy
 
 ## 📁 Project Structure
 
+The project follows a **modular architecture** for better organization, scalability, and maintainability:
+
 ```
 OpenLearn-Hub/
-├── components/           # Reusable React components
-│   ├── Layout.tsx       # Main app layout with navigation
-│   ├── EnhancedContentCard.tsx
-│   ├── FollowButton.tsx
-│   ├── SubscriptionCreatorRow.tsx
-│   └── CourseGatekeeperModal.tsx
-├── pages/               # Route-based page components
-│   ├── TrendingNotesPage.tsx
-│   ├── SubscriptionsPage.tsx
-│   ├── BrowseByPathPage.tsx
-│   └── HubExplorer.tsx
-├── services/            # Business logic layer
-│   ├── authService.ts
-│   ├── subscriptionService.ts
-│   └── trustLevelService.ts
-├── data/                # Mock data and constants
-│   └── demoContents.ts
-├── types.ts             # TypeScript type definitions
-├── App.tsx              # Root component with routing
-├── index.css            # Global styles and Tailwind
-└── vercel.json          # Deployment configuration
+├── src/
+│   ├── app/                      # Application entry point
+│   │   ├── App.tsx              # Main app with routing
+│   │   └── index.tsx            # React DOM entry
+│   │
+│   ├── components/              # UI Components (organized by purpose)
+│   │   ├── layout/             # Layout components
+│   │   │   ├── Layout.tsx
+│   │   │   └── Breadcrumbs.tsx
+│   │   ├── ui/                 # Reusable UI elements
+│   │   │   ├── FollowButton.tsx
+│   │   │   ├── VoteButtons.tsx
+│   │   │   ├── ShareableLink.tsx
+│   │   │   └── VerificationBadge.tsx
+│   │   ├── forms/              # Form components
+│   │   │   ├── verification/   # User verification forms
+│   │   │   ├── upload/         # Content upload forms
+│   │   │   ├── organization/   # Path selector forms
+│   │   │   └── auth/           # Authentication forms
+│   │   ├── modals/             # Modal dialogs
+│   │   │   ├── AuthRequiredModal.tsx
+│   │   │   ├── CourseGatekeeperModal.tsx
+│   │   │   └── ChatbotVerificationModal.tsx
+│   │   ├── content/            # Content display
+│   │   │   ├── EnhancedContentCard.tsx
+│   │   │   ├── SubscriptionCreatorRow.tsx
+│   │   │   └── ProtectedNoteViewer.tsx
+│   │   ├── quiz/               # Quiz components
+│   │   ├── interaction/        # Comments, reviews
+│   │   ├── editor/             # Text editors
+│   │   ├── drive/              # Drive components
+│   │   └── chat/               # Chat components
+│   │
+│   ├── pages/                   # Route-based pages (feature-organized)
+│   │   ├── auth/               # Authentication
+│   │   │   ├── LoginPage.tsx
+│   │   │   ├── SignUpPage.tsx
+│   │   │   └── VerificationPage.tsx
+│   │   ├── hub/                # Content browsing
+│   │   │   ├── HubExplorer.tsx
+│   │   │   ├── TopicExplorer.tsx
+│   │   │   └── BrowseByPathPage.tsx
+│   │   ├── content/            # Content management
+│   │   │   ├── TrendingNotesPage.tsx
+│   │   │   ├── NoteUploadPage.tsx
+│   │   │   └── CourseNoteAccessPage.tsx
+│   │   ├── user/               # User features
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── ProfilePage.tsx
+│   │   │   └── SubscriptionsPage.tsx
+│   │   ├── quiz/               # Quiz pages
+│   │   ├── drive/              # Drive pages
+│   │   └── ai/                 # AI assistant pages
+│   │
+│   ├── services/               # Business logic (domain-organized)
+│   │   ├── auth/               # Authentication
+│   │   │   └── authService.ts
+│   │   ├── content/            # Content management
+│   │   │   ├── contentSourceValidator.ts
+│   │   │   └── interactionService.ts
+│   │   ├── user/               # User services
+│   │   │   ├── subscriptionService.ts
+│   │   │   └── trustLevelService.ts
+│   │   ├── quiz/               # Quiz logic
+│   │   ├── drive/              # Drive sync
+│   │   ├── download/           # Download services
+│   │   └── ai/                 # AI services
+│   │       └── geminiService.ts
+│   │
+│   ├── types/                  # TypeScript definitions
+│   │   ├── index.ts           # Barrel export
+│   │   └── types.ts           # All type definitions
+│   │
+│   ├── constants/              # App constants
+│   │   ├── index.ts           # Barrel export
+│   │   ├── constants.tsx      # General constants
+│   │   └── organizationConstants.ts
+│   │
+│   ├── utils/                  # Utility functions
+│   │   ├── index.ts           # Barrel export
+│   │   └── validation/
+│   │       ├── emailValidator.ts
+│   │       └── fileValidator.ts
+│   │
+│   └── data/                   # Mock/demo data
+│       └── demoContents.ts
+│
+├── dashboards/                 # Dashboard configs
+├── index.html                  # HTML entry point
+├── vite.config.ts             # Vite configuration
+├── tsconfig.json              # TypeScript config
+├── vercel.json                # Deployment config
+└── package.json               # Dependencies
 ```
+
+### Import Path Aliases
+
+The project uses TypeScript path aliases for cleaner imports:
+
+```typescript
+// Instead of: import { User } from '../../../types'
+import { User } from '@/types';
+
+// Instead of: import { Layout } from '../../components/layout/Layout'
+import { Layout } from '@/components/layout/Layout';
+
+// Instead of: import { authService } from '../../../services/auth/authService'
+import { authService } from '@/services/auth/authService';
+```
+
+**Benefits:**
+- ✅ Cleaner, more readable imports
+- ✅ Easier refactoring (no path updates needed)
+- ✅ Better IDE autocomplete
+- ✅ Consistent import style across the codebase
+
 
 ---
 
@@ -323,12 +419,14 @@ We welcome contributions from the community! Here's how you can help:
 
 ## 📊 Statistics
 
-- **50+ Components**: Reusable, well-documented React components
-- **15+ Pages**: Comprehensive coverage of all features
+- **50+ Components**: Organized into 10 logical categories
+- **20+ Pages**: Feature-based organization across 8 directories
+- **10+ Services**: Domain-driven service architecture  
 - **5 Learning Paths**: Multiple ways to organize content
 - **4 User Roles**: Tailored experiences for each role
-- **100% TypeScript**: Full type safety
+- **100% TypeScript**: Full type safety with strict mode
 - **Mobile First**: Responsive on all devices
+- **Modular Architecture**: Clean separation of concerns
 
 ---
 
@@ -349,7 +447,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**Ayon**
+**Ayon & Akash**
 - GitHub: [@tech-akash010](https://github.com/tech-akash010)
 - Project: [OpenLearn-Hub](https://github.com/tech-akash010/OpenLearn-Hub)
 
