@@ -3,6 +3,7 @@ import { BookOpen, GraduationCap, Youtube, Eye, ThumbsUp, MessageSquare, Star, D
 import { DemoContent } from '@/data/demoContents';
 import { FollowButton } from '@/components/ui/FollowButton';
 import { subscriptionService } from '@/services/user/subscriptionService';
+import { VideoPlayer } from './VideoPlayer';
 
 interface EnhancedContentCardProps {
     content: DemoContent;
@@ -75,12 +76,10 @@ export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
             {/* Media Preview Area - Always 16:9 for alignment */}
             <div className={`mb-4 rounded-xl overflow-hidden bg-gray-50 aspect-video shadow-sm border border-gray-100 relative group`}>
                 {content.videoUrl && (forceFree || !organization.coursePath) ? (
-                    <iframe
-                        src={content.videoUrl}
-                        className="w-full h-full"
+                    <VideoPlayer
+                        url={content.videoUrl}
                         title={title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
+                        className="w-full h-full"
                     />
                 ) : (
                     <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center p-6 text-center group-hover:from-blue-50 group-hover:to-indigo-50 transition-all">

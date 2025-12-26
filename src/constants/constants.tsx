@@ -36,7 +36,7 @@ export const INITIAL_TOPICS: Topic[] = [
 
 export const INITIAL_SUBTOPICS: Subtopic[] = [
   { id: 'scheduling', topicId: 'os', title: 'Process Scheduling', description: 'Strategies used by the OS to allocate CPU time to active processes.', status: 'verified', videoUrl: 'https://www.youtube.com/watch?v=UK1kM2Wq51k' },
-  { id: 'memory', topicId: 'os', title: 'Memory Management', description: 'Mapping logical addresses to physical memory and handling swapping.', status: 'verified', videoUrl: 'https://www.youtube.com/watch?v=5lastS8p5kU' },
+  { id: 'memory', topicId: 'os', title: 'Memory Management', description: 'Mapping logical addresses to physical memory and handling swapping.', status: 'verified', videoUrl: 'https://www.youtube.com/watch?v=zFnrATqD-YQ' }, // Updated to working OS Scheduling video
   { id: 'graphs', topicId: 'dsa', title: 'Graph Theory', description: 'Studying nodes and edges to model network structures.', status: 'verified', videoUrl: 'https://www.youtube.com/watch?v=59fUtYYz7ZU' },
 ];
 
@@ -52,6 +52,7 @@ export const INITIAL_CONTENT: ContentItem[] = [
     readiness: 95,
     lastUpdated: '2024-05-20',
     difficulty: Difficulty.Intermediate,
-    videoUrl: 'https://www.youtube.com/watch?v=UK1kM2Wq51k'
+    votes: 342,
+    videoUrl: 'https://www.youtube.com/watch?v=zFnrATqD-YQ' // Valid OS Scheduling video
   }
 ];

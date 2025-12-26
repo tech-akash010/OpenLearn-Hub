@@ -27,6 +27,7 @@ import { authService } from '@/services/auth/authService';
 import { subscriptionService } from '@/services/user/subscriptionService';
 import { ContentInteraction } from '@/types';
 import { FollowButton } from '@/components/ui/FollowButton';
+import { VideoPlayer } from '@/components/content/VideoPlayer';
 
 export const ContentDetail: React.FC = () => {
   const { subjectId, topicId, subtopicId } = useParams<{ subjectId: string, topicId: string, subtopicId: string }>();
@@ -235,16 +236,11 @@ export const ContentDetail: React.FC = () => {
                           <span className="text-gray-200 text-sm font-bold uppercase tracking-widest">Video Lesson</span>
                         </div>
                         <div className="aspect-video w-full">
-                          <iframe
-                            width="100%"
-                            height="100%"
-                            src={item.videoUrl.replace('watch?v=', 'embed/')}
+                          <VideoPlayer
+                            url={item.videoUrl}
                             title={item.title}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
                             className="w-full h-full"
-                          ></iframe>
+                          />
                         </div>
                       </div>
                     )}

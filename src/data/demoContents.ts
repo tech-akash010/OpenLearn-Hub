@@ -13,7 +13,7 @@ export interface DemoContent {
     videoUrl?: string;
 }
 
-const STORAGE_KEY = 'openlearn_demo_contents';
+const STORAGE_KEY = 'openlearn_demo_contents_v4';
 
 export const addDemoContent = (content: DemoContent) => {
     DEMO_CONTENTS.unshift(content);
@@ -297,7 +297,8 @@ const loadInitialContents = (): DemoContent[] => {
             uploadedAt: '2024-02-01T10:00:00Z',
             views: 3100,
             likes: 267,
-            downloads: 945
+            downloads: 945,
+            videoUrl: 'https://www.youtube.com/embed/TNhaISOUy6Q' // User provided React Hooks video
         },
         {
             id: 'content_8',
@@ -365,7 +366,7 @@ const loadInitialContents = (): DemoContent[] => {
             views: 1500,
             likes: 120,
             downloads: 280,
-            videoUrl: 'https://www.youtube.com/embed/b_T8L_7c2kE'
+            videoUrl: 'https://www.youtube.com/embed/WQ9AH2S8B6Y' // User provided Rotational Motion video
         },
         {
             id: 'content_10',
@@ -456,7 +457,7 @@ const loadInitialContents = (): DemoContent[] => {
             views: 2800,
             likes: 198,
             downloads: 560,
-            videoUrl: 'https://www.youtube.com/embed/rfG8ce4nNh0'
+            videoUrl: 'https://www.youtube.com/embed/6WUjbJEeJwM' // User provided Calculus video
         },
         {
             id: 'content_14',
@@ -482,7 +483,7 @@ const loadInitialContents = (): DemoContent[] => {
             views: 3100,
             likes: 267,
             downloads: 945,
-            videoUrl: 'https://www.youtube.com/embed/cF2lQ_gZeW8'
+            videoUrl: 'https://www.youtube.com/embed/TNhaISOUy6Q' // User provided React Hooks video
         },
         {
             id: 'content_15',
@@ -502,7 +503,7 @@ const loadInitialContents = (): DemoContent[] => {
             views: 1900,
             likes: 145,
             downloads: 380,
-            videoUrl: 'https://www.youtube.com/embed/9Gmbp7HXWn4'
+            videoUrl: 'https://www.youtube.com/embed/8N1BxHgsoOw' // Working Thermodynamics video
         },
         {
             id: 'content_16',
@@ -528,7 +529,7 @@ const loadInitialContents = (): DemoContent[] => {
             views: 2700,
             likes: 203,
             downloads: 615,
-            videoUrl: 'https://www.youtube.com/embed/1UrYXuJpvyo'
+            videoUrl: 'https://www.youtube.com/embed/HXV3zeQKqGY' // Working SQL Joins video
         },
         {
             id: 'content_17',
@@ -548,7 +549,8 @@ const loadInitialContents = (): DemoContent[] => {
             uploadedAt: '2024-02-21T10:30:00Z',
             views: 1890,
             likes: 134,
-            downloads: 410
+            downloads: 410,
+            videoUrl: 'https://www.youtube.com/embed/7b34XYgADlM' // Working Electrochemistry video
         },
         {
             id: 'content_18',
@@ -568,7 +570,7 @@ const loadInitialContents = (): DemoContent[] => {
             views: 2300,
             likes: 176,
             downloads: 520,
-            videoUrl: 'https://www.youtube.com/embed/PFDu9oVAE-g'
+            videoUrl: 'https://www.youtube.com/embed/fNk_zzaMoSs' // Working Eigenvalues video
         }
     ];
 };
