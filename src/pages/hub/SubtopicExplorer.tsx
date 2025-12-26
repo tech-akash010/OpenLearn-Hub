@@ -3,7 +3,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { INITIAL_SUBJECTS, INITIAL_TOPICS, INITIAL_SUBTOPICS } from '@/constants';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
-import { ChevronRight, FileText, Plus, CheckCircle2, Bookmark, ArrowRight, Sparkles, Lock, Info } from 'lucide-react';
+import { ChevronRight, FileText, Plus, CheckCircle2, Bookmark, ArrowRight, Sparkles, Lock, Info, PlayCircle } from 'lucide-react';
 import { authService } from '@/services/auth/authService';
 
 export const SubtopicExplorer: React.FC = () => {
@@ -55,9 +55,23 @@ export const SubtopicExplorer: React.FC = () => {
               <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
                 <FileText size={22} />
               </div>
-              <button className="p-2 text-gray-300 hover:text-indigo-600 transition-colors">
-                <Bookmark size={20} />
-              </button>
+              <div className="flex space-x-2">
+                {st.videoUrl && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.open(st.videoUrl, '_blank');
+                    }}
+                    className="p-2 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                    title="Watch Video"
+                  >
+                    <PlayCircle size={20} />
+                  </button>
+                )}
+                <button className="p-2 text-gray-300 hover:text-indigo-600 transition-colors">
+                  <Bookmark size={20} />
+                </button>
+              </div>
             </div>
 
             <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">

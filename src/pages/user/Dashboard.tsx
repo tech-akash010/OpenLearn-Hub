@@ -300,6 +300,13 @@ export const Dashboard: React.FC = () => {
               enabled={true}
             />
             <ActionCard
+              icon={<Users />}
+              title="Subscriptions"
+              description="Followed creators"
+              onClick={() => navigate('/subscriptions')}
+              enabled={true}
+            />
+            <ActionCard
               icon={<MessageSquare />}
               title="Chat with Notes"
               description="AI-powered assistance"

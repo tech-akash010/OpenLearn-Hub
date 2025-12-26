@@ -243,6 +243,7 @@ export interface ContentUpload {
   topic: string;
   subtopic?: string;
   files: UploadedDocument[];
+  attachedVideo?: UploadedDocument;
   sourceMetadata: ContentSourceMetadata;
   organization?: ContentOrganization;
   uploadedBy: string;
@@ -278,6 +279,7 @@ export interface Subtopic {
   title: string;
   description: string;
   status: 'verified' | 'pending';
+  videoUrl?: string;
 }
 
 export interface DriveItem {
@@ -308,6 +310,7 @@ export interface ContentItem {
   readiness: number;
   lastUpdated: string;
   difficulty: Difficulty;
+  videoUrl?: string;
 }
 
 export interface UserStats {

@@ -11,7 +11,8 @@ import {
   Type as TextIcon,
   Trash2,
   UploadCloud,
-  FileText
+  FileText,
+  Video
 } from 'lucide-react';
 import { INITIAL_SUBJECTS, INITIAL_TOPICS, INITIAL_SUBTOPICS } from '@/constants';
 import { Difficulty, Quiz, ContentSourceMetadata } from '@/types';
@@ -26,15 +27,17 @@ import { WatermarkInput, WatermarkConfig } from './WatermarkInput';
 interface UploadWizardProps {
   onClose: () => void;
   onComplete: (data: any) => void;
+  initialData?: any;
 }
 
-export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete }) => {
+export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete, initialData }) => {
   const user = authService.getUser();
 
   // Check if community contributor has permission to upload
   if (user && user.role === 'community_contributor' && user.communityMetrics) {
     const isBronze = user.communityMetrics.trustLevel === 'bronze';
-    if (isBronze) {
+    // If editing, we skip the bronze check (assuming they could only edit what they already uploaded)
+    if (isBronze && !initialData) {
       return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden">
@@ -113,23 +116,24 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(initialData ? 4 : 1); // Skip selecting subject/topic if editing
   const [selection, setSelection] = useState({
-    subject: '',
-    topic: '',
-    subtopic: '',
-    title: '',
-    content: '',
-    difficulty: Difficulty.Beginner,
+    subject: initialData?.subject?.id || '',
+    topic: initialData?.topic?.id || '',
+    subtopic: initialData?.subtopic?.id || '',
+    title: initialData?.title || '',
+    content: initialData?.content || '',
+    difficulty: initialData?.difficulty || Difficulty.Beginner,
     isNewSubject: false,
     isNewTopic: false,
     isNewSubtopic: false,
     newName: '',
-    attachedImage: null as string | null,
-    attachedPdf: null as { name: string; data: string } | null,
-    attachedQuiz: null as Quiz | null,
-    sourceMetadata: null as ContentSourceMetadata | null,
-    watermarkConfig: {
+    attachedImage: initialData?.attachedImage || null as string | null,
+    attachedPdf: initialData?.attachedPdf || null as { name: string; data: string } | null,
+    attachedVideo: initialData?.attachedVideo || null as { name: string; data: string } | null,
+    attachedQuiz: initialData?.attachedQuiz || null as Quiz | null,
+    sourceMetadata: initialData?.sourceMetadata || null as ContentSourceMetadata | null,
+    watermarkConfig: initialData?.watermarkConfig || {
       enabled: false,
       text: authService.getUser()?.name || '',
       position: 'bottom-right' as const,
@@ -188,18 +192,25 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
     }
   };
 
+  const prevSubject = useRef(selection.subject);
+  const prevTopic = useRef(selection.topic);
+
   useEffect(() => {
     setFilteredTopics(INITIAL_TOPICS.filter(t => t.subjectId === selection.subject));
-    if (selection.subject) {
+    // Only reset if subject actually changed (prevents reset on initial load with pre-filled data)
+    if (selection.subject && selection.subject !== prevSubject.current) {
       setSelection(prev => ({ ...prev, topic: '', subtopic: '' }));
     }
+    prevSubject.current = selection.subject;
   }, [selection.subject]);
 
   useEffect(() => {
     setFilteredSubtopics(INITIAL_SUBTOPICS.filter(st => st.topicId === selection.topic));
-    if (selection.topic) {
+    // Only reset if topic actually changed
+    if (selection.topic && selection.topic !== prevTopic.current) {
       setSelection(prev => ({ ...prev, subtopic: '' }));
     }
+    prevTopic.current = selection.topic;
   }, [selection.topic]);
 
   const handleNext = () => setStep(s => s + 1);
@@ -233,6 +244,23 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
     }
   };
 
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('video/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelection(prev => ({
+          ...prev,
+          attachedVideo: {
+            name: file.name,
+            data: reader.result as string
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const removeImage = () => {
     setSelection(prev => ({ ...prev, attachedImage: null }));
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -241,6 +269,11 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
   const removePdf = () => {
     setSelection(prev => ({ ...prev, attachedPdf: null }));
     if (pdfInputRef.current) pdfInputRef.current.value = '';
+  };
+
+  const removeVideo = () => {
+    setSelection(prev => ({ ...prev, attachedVideo: null }));
+    // If we had a ref for video input, reset it here. For now, simple state clear.
   };
 
   const canProgress = () => {
@@ -433,6 +466,58 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete 
                       onChange={(html) => setSelection({ ...selection, content: html })}
                       placeholder="Explain the core concepts in detail... Use the toolbar to format your text with headings, lists, and more."
                     />
+
+                    {/* Optional Video Upload */}
+                    <div className="mt-6">
+                      <label className="flex items-center text-xs font-black text-gray-400 uppercase tracking-widest mb-3">
+                        <Video size={14} className="mr-2" /> Video Explanation (Optional)
+                      </label>
+
+                      {!selection.attachedVideo ? (
+                        <div className="relative group">
+                          <input
+                            type="file"
+                            accept="video/*"
+                            onChange={handleVideoUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                          />
+                          <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl p-6 flex items-center justify-center space-x-4 transition-all group-hover:border-blue-400 group-hover:bg-blue-50/50">
+                            <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors">
+                              <Video size={24} />
+                            </div>
+                            <div>
+                              <p className="font-bold text-gray-700 group-hover:text-blue-700 transition-colors">
+                                Upload a video file
+                              </p>
+                              <p className="text-xs text-gray-400 font-medium">MP4, WebM (Max 50MB)</p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800">
+                          {/* Video Header */}
+                          <div className="bg-black/40 backdrop-blur-md p-3 flex items-center justify-between absolute top-0 left-0 right-0 z-10">
+                            <div className="flex items-center space-x-2 text-white">
+                              <Video size={16} />
+                              <span className="text-xs font-bold truncate max-w-[200px]">{selection.attachedVideo.name}</span>
+                            </div>
+                            <button
+                              onClick={removeVideo}
+                              className="p-1.5 bg-black/60 rounded-full text-white hover:bg-red-600 transition-colors"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+
+                          {/* Video Preview */}
+                          <video
+                            src={selection.attachedVideo.data}
+                            controls
+                            className="w-full aspect-video bg-black"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Attachment Column */}

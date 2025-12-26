@@ -92,7 +92,7 @@ export const TopicExplorer: React.FC = () => {
             </div>
 
             {/* Corner Decorative */}
-            <CheckCircle2 size={80} className="absolute -bottom-6 -right-6 text-gray-50/50 group-hover:text-blue-50/80 transition-colors" />
+            < CheckCircle2 size={80} className="absolute -bottom-6 -right-6 text-gray-50/50 group-hover:text-blue-50/80 transition-colors" />
           </Link>
         ))}
 
@@ -142,6 +142,6 @@ export const TopicExplorer: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };

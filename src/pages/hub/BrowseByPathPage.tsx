@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, GraduationCap, Youtube, ChevronRight, Home, Folder, FileText, Trophy } from 'lucide-react';
+import { BookOpen, GraduationCap, Youtube, ChevronRight, Home, Folder, FileText, Trophy, Search } from 'lucide-react';
 import { DEMO_CONTENTS, DemoContent } from '@/data/demoContents';
 import { EnhancedContentCard } from '@/components/content/EnhancedContentCard';
 import { CourseGatekeeperModal } from '@/components/modals/CourseGatekeeperModal';
@@ -44,6 +44,10 @@ export const BrowseByPathPage: React.FC = () => {
     const [selectedExamSubject, setSelectedExamSubject] = useState<string | null>(null);
     const [selectedExamTopic, setSelectedExamTopic] = useState<string | null>(null);
 
+
+    // Search State
+    const [searchTerm, setSearchTerm] = useState('');
+
     const handleContentClick = (content: DemoContent) => {
         if (activeTab === 'course') {
             setSelectedGatedContent(content);
@@ -58,6 +62,7 @@ export const BrowseByPathPage: React.FC = () => {
         setSelectedSubject(null);
         setSelectedTopic(null);
         setSelectedSubtopic(null);
+        setSearchTerm('');
     };
 
     const resetUniversityNav = () => {
@@ -66,17 +71,20 @@ export const BrowseByPathPage: React.FC = () => {
         setSelectedDepartment(null);
         setSelectedUniSubject(null);
         setSelectedUniTopic(null);
+        setSearchTerm('');
     };
 
     const resetChannelNav = () => {
         setSelectedChannel(null);
         setSelectedPlaylist(null);
         setSelectedChannelTopic(null);
+        setSearchTerm('');
     };
 
     const resetCourseNav = () => {
         setSelectedCourse(null);
         setSelectedCourseTopic(null);
+        setSearchTerm('');
     };
 
     const resetExamNav = () => {
@@ -84,6 +92,7 @@ export const BrowseByPathPage: React.FC = () => {
         setSelectedExamYear(null);
         setSelectedExamSubject(null);
         setSelectedExamTopic(null);
+        setSearchTerm('');
     };
 
     // Get unique values for hierarchical navigation
@@ -504,64 +513,85 @@ export const BrowseByPathPage: React.FC = () => {
                     {/* SUBJECT PATH */}
                     {activeTab === 'subject' && (
                         <>
+                            {/* Search Bar - Context Aware */}
+                            <div className="mb-8 relative max-w-md mx-auto">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                <input
+                                    type="text"
+                                    placeholder={`Search ${selectedSubtopic ? 'notes' : selectedTopic ? 'subtopics' : selectedSubject ? 'topics' : 'subjects'}...`}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-gray-700 placeholder:text-gray-400"
+                                />
+                            </div>
+
                             {!selectedSubject && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getUniqueSubjects().map((subject, index) => (
-                                        <div key={subject} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                subject,
-                                                DEMO_CONTENTS.filter(c => c.organization.subjectPath?.subject === subject).length,
-                                                () => setSelectedSubject(subject),
-                                                'blue',
-                                                'from-blue-500 to-blue-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getUniqueSubjects()
+                                        .filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((subject, index) => (
+                                            <div key={subject} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    subject,
+                                                    DEMO_CONTENTS.filter(c => c.organization.subjectPath?.subject === subject).length,
+                                                    () => { setSelectedSubject(subject); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-blue-500 to-blue-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedSubject && !selectedTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getTopicsForSubject(selectedSubject).map((topic, index) => (
-                                        <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                topic,
-                                                DEMO_CONTENTS.filter(c => c.organization.subjectPath?.subject === selectedSubject && c.organization.subjectPath?.coreTopic === topic).length,
-                                                () => setSelectedTopic(topic),
-                                                'blue',
-                                                'from-blue-500 to-blue-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getTopicsForSubject(selectedSubject)
+                                        .filter(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((topic, index) => (
+                                            <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    topic,
+                                                    DEMO_CONTENTS.filter(c => c.organization.subjectPath?.subject === selectedSubject && c.organization.subjectPath?.coreTopic === topic).length,
+                                                    () => { setSelectedTopic(topic); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-blue-500 to-blue-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedSubject && selectedTopic && !selectedSubtopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getSubtopicsForTopic(selectedSubject, selectedTopic).map((subtopic, index) => (
-                                        <div key={subtopic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                subtopic,
-                                                DEMO_CONTENTS.filter(c => c.organization.subjectPath?.subject === selectedSubject && c.organization.subjectPath?.coreTopic === selectedTopic && c.organization.subjectPath?.subtopic === subtopic).length,
-                                                () => setSelectedSubtopic(subtopic),
-                                                'blue',
-                                                'from-blue-500 to-blue-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getSubtopicsForTopic(selectedSubject, selectedTopic)
+                                        .filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((subtopic, index) => (
+                                            <div key={subtopic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    subtopic,
+                                                    DEMO_CONTENTS.filter(c => c.organization.subjectPath?.subject === selectedSubject && c.organization.subjectPath?.coreTopic === selectedTopic && c.organization.subjectPath?.subtopic === subtopic).length,
+                                                    () => { setSelectedSubtopic(subtopic); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-blue-500 to-blue-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedSubject && selectedTopic && selectedSubtopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getContentForSubtopic(selectedSubject, selectedTopic, selectedSubtopic).map((content, index) => (
-                                        <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            <EnhancedContentCard
-                                                content={content}
-                                                onClick={() => handleContentClick(content)}
-                                            />
-                                        </div>
-                                    ))}
+                                    {getContentForSubtopic(selectedSubject, selectedTopic, selectedSubtopic)
+                                        .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((content, index) => (
+                                            <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                <EnhancedContentCard
+                                                    content={content}
+                                                    onClick={() => handleContentClick(content)}
+                                                    forceFree={true}
+                                                />
+                                            </div>
+                                        ))}
                                 </div>
                             )}
                         </>
@@ -570,96 +600,121 @@ export const BrowseByPathPage: React.FC = () => {
                     {/* UNIVERSITY PATH */}
                     {activeTab === 'university' && (
                         <>
+                            {/* Search Bar - Context Aware */}
+                            <div className="mb-8 relative max-w-md mx-auto">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                <input
+                                    type="text"
+                                    placeholder={`Search ${selectedUniTopic ? 'content' : selectedUniSubject ? 'topics' : selectedDepartment ? 'subjects' : selectedSemester ? 'departments' : selectedUniversity ? 'semesters' : 'universities'}...`}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-gray-700 placeholder:text-gray-400"
+                                />
+                            </div>
+
                             {!selectedUniversity && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getUniqueUniversities().map((university, index) => (
-                                        <div key={university} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                university,
-                                                DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === university).length,
-                                                () => setSelectedUniversity(university),
-                                                'blue',
-                                                'from-blue-600 to-indigo-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getUniqueUniversities()
+                                        .filter(u => u.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((university, index) => (
+                                            <div key={university} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    university,
+                                                    DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === university).length,
+                                                    () => { setSelectedUniversity(university); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-blue-600 to-indigo-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedUniversity && !selectedSemester && (
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                                    {getSemestersForUniversity(selectedUniversity).map((semester, index) => (
-                                        <div key={semester} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                `Semester ${semester}`,
-                                                DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === selectedUniversity && c.organization.universityPath?.semester === semester).length,
-                                                () => setSelectedSemester(semester),
-                                                'blue',
-                                                'from-blue-600 to-indigo-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getSemestersForUniversity(selectedUniversity)
+                                        .filter(s => (`Semester ${s}`).toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((semester, index) => (
+                                            <div key={semester} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    `Semester ${semester}`,
+                                                    DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === selectedUniversity && c.organization.universityPath?.semester === semester).length,
+                                                    () => { setSelectedSemester(semester); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-blue-600 to-indigo-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedUniversity && selectedSemester && !selectedDepartment && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getDepartmentsForSemester(selectedUniversity, selectedSemester).map((department, index) => (
-                                        <div key={department} className="animate-in fade-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                department,
-                                                DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === selectedUniversity && c.organization.universityPath?.semester === selectedSemester && c.organization.universityPath?.department === department).length,
-                                                () => setSelectedDepartment(department),
-                                                'blue',
-                                                'from-blue-600 to-indigo-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getDepartmentsForSemester(selectedUniversity, selectedSemester)
+                                        .filter(d => d.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((department, index) => (
+                                            <div key={department} className="animate-in fade-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    department,
+                                                    DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === selectedUniversity && c.organization.universityPath?.semester === selectedSemester && c.organization.universityPath?.department === department).length,
+                                                    () => { setSelectedDepartment(department); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-blue-600 to-indigo-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedUniversity && selectedSemester && selectedDepartment && !selectedUniSubject && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getSubjectsForDepartment(selectedUniversity, selectedSemester, selectedDepartment).map((subject, index) => (
-                                        <div key={subject} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                subject,
-                                                DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === selectedUniversity && c.organization.universityPath?.semester === selectedSemester && c.organization.universityPath?.department === selectedDepartment && c.organization.universityPath?.subject === subject).length,
-                                                () => setSelectedUniSubject(subject),
-                                                'blue',
-                                                'from-blue-600 to-indigo-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getSubjectsForDepartment(selectedUniversity, selectedSemester, selectedDepartment)
+                                        .filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((subject, index) => (
+                                            <div key={subject} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    subject,
+                                                    DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === selectedUniversity && c.organization.universityPath?.semester === selectedSemester && c.organization.universityPath?.department === selectedDepartment && c.organization.universityPath?.subject === subject).length,
+                                                    () => { setSelectedUniSubject(subject); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-blue-600 to-indigo-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedUniversity && selectedSemester && selectedDepartment && selectedUniSubject && !selectedUniTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getTopicsForUniSubject(selectedUniversity, selectedSemester, selectedDepartment, selectedUniSubject).map((topic, index) => (
-                                        <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                topic,
-                                                DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === selectedUniversity && c.organization.universityPath?.semester === selectedSemester && c.organization.universityPath?.department === selectedDepartment && c.organization.universityPath?.subject === selectedUniSubject && c.organization.universityPath?.topic === topic).length,
-                                                () => setSelectedUniTopic(topic),
-                                                'blue',
-                                                'from-blue-600 to-indigo-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getTopicsForUniSubject(selectedUniversity, selectedSemester, selectedDepartment, selectedUniSubject)
+                                        .filter(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((topic, index) => (
+                                            <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    topic,
+                                                    DEMO_CONTENTS.filter(c => c.organization.universityPath?.university === selectedUniversity && c.organization.universityPath?.semester === selectedSemester && c.organization.universityPath?.department === selectedDepartment && c.organization.universityPath?.subject === selectedUniSubject && c.organization.universityPath?.topic === topic).length,
+                                                    () => { setSelectedUniTopic(topic); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-blue-600 to-indigo-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedUniversity && selectedSemester && selectedDepartment && selectedUniSubject && selectedUniTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getContentForUniTopic(selectedUniversity, selectedSemester, selectedDepartment, selectedUniSubject, selectedUniTopic).map((content, index) => (
-                                        <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            <EnhancedContentCard
-                                                content={content}
-                                                onClick={() => handleContentClick(content)}
-                                            />
-                                        </div>
-                                    ))}
+                                    {getContentForUniTopic(selectedUniversity, selectedSemester, selectedDepartment, selectedUniSubject, selectedUniTopic)
+                                        .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((content, index) => (
+                                            <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                <EnhancedContentCard
+                                                    content={content}
+                                                    onClick={() => handleContentClick(content)}
+                                                    forceFree={true}
+                                                />
+                                            </div>
+                                        ))}
                                 </div>
                             )}
                         </>
@@ -668,64 +723,85 @@ export const BrowseByPathPage: React.FC = () => {
                     {/* CHANNEL PATH */}
                     {activeTab === 'channel' && (
                         <>
+                            {/* Search Bar - Context Aware */}
+                            <div className="mb-8 relative max-w-md mx-auto">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                <input
+                                    type="text"
+                                    placeholder={`Search ${selectedChannelTopic ? 'content' : selectedPlaylist ? 'topics' : selectedChannel ? 'playlists' : 'channels'}...`}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-gray-700 placeholder:text-gray-400"
+                                />
+                            </div>
+
                             {!selectedChannel && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getUniqueChannels().map((channel, index) => (
-                                        <div key={channel} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                channel,
-                                                DEMO_CONTENTS.filter(c => c.organization.channelPath?.channelName === channel).length,
-                                                () => setSelectedChannel(channel),
-                                                'blue',
-                                                'from-cyan-500 to-blue-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getUniqueChannels()
+                                        .filter(c => c.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((channel, index) => (
+                                            <div key={channel} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    channel,
+                                                    DEMO_CONTENTS.filter(c => c.organization.channelPath?.channelName === channel).length,
+                                                    () => { setSelectedChannel(channel); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-cyan-500 to-blue-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedChannel && !selectedPlaylist && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getPlaylistsForChannel(selectedChannel).map((playlist, index) => (
-                                        <div key={playlist} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                playlist,
-                                                DEMO_CONTENTS.filter(c => c.organization.channelPath?.channelName === selectedChannel && c.organization.channelPath?.playlistName === playlist).length,
-                                                () => setSelectedPlaylist(playlist),
-                                                'blue',
-                                                'from-cyan-500 to-blue-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getPlaylistsForChannel(selectedChannel)
+                                        .filter(p => p.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((playlist, index) => (
+                                            <div key={playlist} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    playlist,
+                                                    DEMO_CONTENTS.filter(c => c.organization.channelPath?.channelName === selectedChannel && c.organization.channelPath?.playlistName === playlist).length,
+                                                    () => { setSelectedPlaylist(playlist); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-cyan-500 to-blue-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedChannel && selectedPlaylist && !selectedChannelTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getTopicsForPlaylist(selectedChannel, selectedPlaylist).map((topic, index) => (
-                                        <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                topic,
-                                                DEMO_CONTENTS.filter(c => c.organization.channelPath?.channelName === selectedChannel && c.organization.channelPath?.playlistName === selectedPlaylist && c.organization.channelPath?.topic === topic).length,
-                                                () => setSelectedChannelTopic(topic),
-                                                'blue',
-                                                'from-cyan-500 to-blue-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getTopicsForPlaylist(selectedChannel, selectedPlaylist)
+                                        .filter(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((topic, index) => (
+                                            <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    topic,
+                                                    DEMO_CONTENTS.filter(c => c.organization.channelPath?.channelName === selectedChannel && c.organization.channelPath?.playlistName === selectedPlaylist && c.organization.channelPath?.topic === topic).length,
+                                                    () => { setSelectedChannelTopic(topic); setSearchTerm(''); },
+                                                    'blue',
+                                                    'from-cyan-500 to-blue-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedChannel && selectedPlaylist && selectedChannelTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getContentForChannelTopic(selectedChannel, selectedPlaylist, selectedChannelTopic).map((content, index) => (
-                                        <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            <EnhancedContentCard
-                                                content={content}
-                                                onClick={() => handleContentClick(content)}
-                                            />
-                                        </div>
-                                    ))}
+                                    {getContentForChannelTopic(selectedChannel, selectedPlaylist, selectedChannelTopic)
+                                        .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((content, index) => (
+                                            <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                <EnhancedContentCard
+                                                    content={content}
+                                                    onClick={() => handleContentClick(content)}
+                                                    forceFree={true}
+                                                />
+                                            </div>
+                                        ))}
                                 </div>
                             )}
                         </>
@@ -734,80 +810,102 @@ export const BrowseByPathPage: React.FC = () => {
                     {/* COURSE PATH (New 4-Level) */}
                     {activeTab === 'course' && (
                         <>
+                            {/* Search Bar - Context Aware */}
+                            <div className="mb-8 relative max-w-md mx-auto">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                <input
+                                    type="text"
+                                    placeholder={`Search ${selectedCourseTopic ? 'content' : selectedCourse ? 'topics' : selectedInstructor ? 'courses' : selectedProvider ? 'instructors' : 'providers'}...`}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-gray-700 placeholder:text-gray-400"
+                                />
+                            </div>
+
                             {!selectedProvider && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getUniqueProviders().map((provider, index) => (
-                                        <div key={provider} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                provider,
-                                                DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === provider).length,
-                                                () => setSelectedProvider(provider),
-                                                'purple',
-                                                'from-purple-500 to-pink-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getUniqueProviders()
+                                        .filter(p => p.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((provider, index) => (
+                                            <div key={provider} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    provider,
+                                                    DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === provider).length,
+                                                    () => { setSelectedProvider(provider); setSearchTerm(''); },
+                                                    'purple',
+                                                    'from-purple-500 to-pink-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedProvider && !selectedInstructor && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getInstructorsForProvider(selectedProvider).map((instructor, index) => (
-                                        <div key={instructor} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                instructor,
-                                                DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === selectedProvider && c.organization.coursePath?.instructor === instructor).length,
-                                                () => setSelectedInstructor(instructor),
-                                                'purple',
-                                                'from-purple-500 to-pink-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getInstructorsForProvider(selectedProvider)
+                                        .filter(i => i.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((instructor, index) => (
+                                            <div key={instructor} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    instructor,
+                                                    DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === selectedProvider && c.organization.coursePath?.instructor === instructor).length,
+                                                    () => { setSelectedInstructor(instructor); setSearchTerm(''); },
+                                                    'purple',
+                                                    'from-purple-500 to-pink-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedProvider && selectedInstructor && !selectedCourse && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getCoursesForInstructor(selectedProvider, selectedInstructor).map((course, index) => (
-                                        <div key={course} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                course,
-                                                DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === selectedProvider && c.organization.coursePath?.instructor === selectedInstructor && c.organization.coursePath?.courseName === course).length,
-                                                () => setSelectedCourse(course),
-                                                'purple',
-                                                'from-purple-500 to-pink-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getCoursesForInstructor(selectedProvider, selectedInstructor)
+                                        .filter(c => c.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((course, index) => (
+                                            <div key={course} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    course,
+                                                    DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === selectedProvider && c.organization.coursePath?.instructor === selectedInstructor && c.organization.coursePath?.courseName === course).length,
+                                                    () => setSelectedCourse(course),
+                                                    'purple',
+                                                    'from-purple-500 to-pink-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedProvider && selectedInstructor && selectedCourse && !selectedCourseTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getTopicsForCourse(selectedProvider, selectedInstructor, selectedCourse).map((topic, index) => (
-                                        <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                topic,
-                                                DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === selectedProvider && c.organization.coursePath?.instructor === selectedInstructor && c.organization.coursePath?.courseName === selectedCourse && c.organization.coursePath?.topic === topic).length,
-                                                () => setSelectedCourseTopic(topic),
-                                                'purple',
-                                                'from-purple-500 to-pink-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getTopicsForCourse(selectedProvider, selectedInstructor, selectedCourse)
+                                        .filter(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((topic, index) => (
+                                            <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    topic,
+                                                    DEMO_CONTENTS.filter(c => c.organization.coursePath?.provider === selectedProvider && c.organization.coursePath?.instructor === selectedInstructor && c.organization.coursePath?.courseName === selectedCourse && c.organization.coursePath?.topic === topic).length,
+                                                    () => { setSelectedCourseTopic(topic); setSearchTerm(''); },
+                                                    'purple',
+                                                    'from-purple-500 to-pink-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedProvider && selectedInstructor && selectedCourse && selectedCourseTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getContentForCourseTopic(selectedProvider, selectedInstructor, selectedCourse, selectedCourseTopic).map((content, index) => (
-                                        <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            <EnhancedContentCard
-                                                content={content}
-                                                onClick={() => handleContentClick(content)}
-                                            />
-                                        </div>
-                                    ))}
+                                    {getContentForCourseTopic(selectedProvider, selectedInstructor, selectedCourse, selectedCourseTopic)
+                                        .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((content, index) => (
+                                            <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                <EnhancedContentCard
+                                                    content={content}
+                                                    onClick={() => handleContentClick(content)}
+                                                />
+                                            </div>
+                                        ))}
                                 </div>
                             )}
                         </>
@@ -816,81 +914,104 @@ export const BrowseByPathPage: React.FC = () => {
                     {/* COMPETITIVE EXAMS PATH */}
                     {activeTab === 'competitive_exam' && (
                         <>
+                            {/* Search Bar - Context Aware */}
+                            <div className="mb-8 relative max-w-md mx-auto">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                <input
+                                    type="text"
+                                    placeholder={`Search ${selectedExamTopic ? 'content' : selectedExamSubject ? 'topics' : selectedExamYear ? 'subjects' : selectedExam ? 'years' : 'exams'}...`}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-gray-700 placeholder:text-gray-400"
+                                />
+                            </div>
+
                             {!selectedExam && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getUniqueExams().map((exam, index) => (
-                                        <div key={exam} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                exam,
-                                                DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === exam).length,
-                                                () => setSelectedExam(exam),
-                                                'amber',
-                                                'from-amber-500 to-orange-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getUniqueExams()
+                                        .filter(e => e.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((exam, index) => (
+                                            <div key={exam} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    exam,
+                                                    DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === exam).length,
+                                                    () => { setSelectedExam(exam); setSearchTerm(''); },
+                                                    'amber',
+                                                    'from-amber-500 to-orange-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedExam && !selectedExamYear && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getYearsForExam(selectedExam).map((year, index) => (
-                                        <div key={year} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                year,
-                                                DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === selectedExam && c.organization.competitiveExamPath?.year === year).length,
-                                                () => setSelectedExamYear(year),
-                                                'amber',
-                                                'from-amber-500 to-orange-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getYearsForExam(selectedExam)
+                                        .filter(y => y.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((year, index) => (
+                                            <div key={year} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    year,
+                                                    DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === selectedExam && c.organization.competitiveExamPath?.year === year).length,
+                                                    () => { setSelectedExamYear(year); setSearchTerm(''); },
+                                                    'amber',
+                                                    'from-amber-500 to-orange-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedExam && selectedExamYear && !selectedExamSubject && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getSubjectsForExamYear(selectedExam, selectedExamYear).map((subject, index) => (
-                                        <div key={subject} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                subject,
-                                                DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === selectedExam && c.organization.competitiveExamPath?.year === selectedExamYear && c.organization.competitiveExamPath?.subject === subject).length,
-                                                () => setSelectedExamSubject(subject),
-                                                'amber',
-                                                'from-amber-500 to-orange-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getSubjectsForExamYear(selectedExam, selectedExamYear)
+                                        .filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((subject, index) => (
+                                            <div key={subject} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    subject,
+                                                    DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === selectedExam && c.organization.competitiveExamPath?.year === selectedExamYear && c.organization.competitiveExamPath?.subject === subject).length,
+                                                    () => { setSelectedExamSubject(subject); setSearchTerm(''); },
+                                                    'amber',
+                                                    'from-amber-500 to-orange-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedExam && selectedExamYear && selectedExamSubject && !selectedExamTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getTopicsForExamSubject(selectedExam, selectedExamYear, selectedExamSubject).map((topic, index) => (
-                                        <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            {renderCategoryCard(
-                                                topic,
-                                                DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === selectedExam && c.organization.competitiveExamPath?.year === selectedExamYear && c.organization.competitiveExamPath?.subject === selectedExamSubject && c.organization.competitiveExamPath?.topic === topic).length,
-                                                () => setSelectedExamTopic(topic),
-                                                'amber',
-                                                'from-amber-500 to-orange-600'
-                                            )}
-                                        </div>
-                                    ))}
+                                    {getTopicsForExamSubject(selectedExam, selectedExamYear, selectedExamSubject)
+                                        .filter(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((topic, index) => (
+                                            <div key={topic} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                {renderCategoryCard(
+                                                    topic,
+                                                    DEMO_CONTENTS.filter(c => c.organization.competitiveExamPath?.exam === selectedExam && c.organization.competitiveExamPath?.year === selectedExamYear && c.organization.competitiveExamPath?.subject === selectedExamSubject && c.organization.competitiveExamPath?.topic === topic).length,
+                                                    () => { setSelectedExamTopic(topic); setSearchTerm(''); },
+                                                    'amber',
+                                                    'from-amber-500 to-orange-600'
+                                                )}
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
                             {selectedExam && selectedExamYear && selectedExamSubject && selectedExamTopic && (
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {getContentForExamTopic(selectedExam, selectedExamYear, selectedExamSubject, selectedExamTopic).map((content, index) => (
-                                        <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
-                                            <EnhancedContentCard
-                                                content={content}
-                                                // Competitive exams link directly to the note, NOT the course gatekeeper
-                                                onClick={() => navigate(`/note/${content.id}`)}
-                                            />
-                                        </div>
-                                    ))}
+                                    {getContentForExamTopic(selectedExam, selectedExamYear, selectedExamSubject, selectedExamTopic)
+                                        .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        .map((content, index) => (
+                                            <div key={content.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 50}ms` }}>
+                                                <EnhancedContentCard
+                                                    content={content}
+                                                    // Competitive exams link directly to the note, NOT the course gatekeeper
+                                                    onClick={() => navigate(`/note/${content.id}`)}
+                                                    forceFree={true}
+                                                />
+                                            </div>
+                                        ))}
                                 </div>
                             )}
                         </>

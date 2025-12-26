@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, GraduationCap, Youtube, Eye, ThumbsUp, MessageSquare, Star, Download, ShieldCheck, Tag } from 'lucide-react';
+import { BookOpen, GraduationCap, Youtube, Eye, ThumbsUp, MessageSquare, Star, Download, ShieldCheck, Tag, Video } from 'lucide-react';
 import { DemoContent } from '@/data/demoContents';
 import { FollowButton } from '@/components/ui/FollowButton';
 import { subscriptionService } from '@/services/user/subscriptionService';
@@ -7,11 +7,13 @@ import { subscriptionService } from '@/services/user/subscriptionService';
 interface EnhancedContentCardProps {
     content: DemoContent;
     onClick?: () => void;
+    forceFree?: boolean;
 }
 
 export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
     content,
-    onClick
+    onClick,
+    forceFree = false
 }) => {
     const { title, description, organization, uploadedBy, views, likes } = content;
     const { subjectPath, universityPath, channelPath } = organization;
@@ -46,12 +48,21 @@ export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
                 <h3 className="font-black text-gray-900 text-lg group-hover:text-blue-600 transition-colors flex-1 pr-2 line-clamp-1">
                     {title}
                 </h3>
-                <div className="flex items-center space-x-1 bg-green-50 px-2 py-1 rounded-full text-[10px] font-bold text-green-700 border border-green-200 shrink-0">
-                    <ShieldCheck size={10} />
-                    {(organization.universityPath || organization.coursePath) ? (
-                        <span>Course</span>
-                    ) : (
-                        <span>Free</span>
+                <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center space-x-1 bg-green-50 px-2 py-1 rounded-full text-[10px] font-bold text-green-700 border border-green-200">
+                        <ShieldCheck size={10} />
+                        {!forceFree && organization.coursePath ? (
+                            <span>Course</span>
+                        ) : (
+                            <span>Free</span>
+                        )}
+                    </div>
+                    {/* Video Badge */}
+                    {content.videoUrl && (
+                        <div className="flex items-center space-x-1 bg-red-50 px-2 py-1 rounded-full text-[10px] font-bold text-red-700 border border-red-200">
+                            <Youtube size={10} />
+                            <span>Video</span>
+                        </div>
                     )}
                 </div>
             </div>
@@ -60,6 +71,43 @@ export const EnhancedContentCard: React.FC<EnhancedContentCardProps> = ({
             <p className="text-sm text-gray-600 font-medium mb-4 line-clamp-2">
                 {description}
             </p>
+
+            {/* Media Preview Area - Always 16:9 for alignment */}
+            <div className={`mb-4 rounded-xl overflow-hidden bg-gray-50 aspect-video shadow-sm border border-gray-100 relative group`}>
+                {content.videoUrl && (forceFree || !organization.coursePath) ? (
+                    <iframe
+                        src={content.videoUrl}
+                        className="w-full h-full"
+                        title={title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                    />
+                ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center p-6 text-center group-hover:from-blue-50 group-hover:to-indigo-50 transition-all">
+                        {content.videoUrl && organization.coursePath ? (
+                            <>
+                                <div className="w-12 h-12 rounded-full bg-red-50 shadow-sm flex items-center justify-center mb-2 group-hover:scale-110 transition-transform border border-red-100">
+                                    <Video size={24} className="text-red-400 group-hover:text-red-600 transition-colors" />
+                                </div>
+                                <span className="text-xs font-black text-red-300 uppercase tracking-widest group-hover:text-red-500 transition-colors">
+                                    Video in Course
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                    <BookOpen className="text-gray-400 group-hover:text-blue-500 transition-colors" size={24} />
+                                </div>
+                                <span className="text-xs font-black text-gray-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">
+                                    Preview Note
+                                </span>
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
+
+
 
             {/* Organization Paths - Show max 2, simplified */}
             <div className="space-y-2 mb-4">

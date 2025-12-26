@@ -13,12 +13,15 @@ export const CourseNoteAccessPage: React.FC = () => {
     const user = authService.getUser();
     const navigate = useNavigate();
 
-    // Mock validation (in real app, this would validate JWT)
-    const [isValidating, setIsValidating] = useState(false);
-    const [accessGranted, setAccessGranted] = useState(false); // Mock: Default to false to show enrollment screen
-
     // Find the actual demo content from navigation
     const foundContent = DEMO_CONTENTS.find(c => c.id === courseNoteId);
+
+    // Mock validation (in real app, this would validate JWT)
+    const [isValidating, setIsValidating] = useState(false);
+    // Auto-grant access if the user is the uploader
+    const [accessGranted, setAccessGranted] = useState(
+        user && foundContent ? user.name === foundContent.uploadedBy : false
+    );
 
     // Redirect if not found (or show not found access page)
     if (!foundContent) {

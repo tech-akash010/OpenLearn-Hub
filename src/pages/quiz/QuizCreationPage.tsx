@@ -135,6 +135,12 @@ export const QuizCreationPage: React.FC = () => {
         setStep('create-quiz');
     };
 
+    const handleEditQuiz = (note: UploadedNote) => {
+        // Open quiz editor directly for editing (skip intermediate step)
+        setSelectedNote(note);
+        setShowQuizEditor(true);
+    };
+
     const handleCreateQuiz = (quiz: Quiz) => {
         setCurrentQuiz(quiz);
         setShowQuizEditor(false);
@@ -361,7 +367,7 @@ export const QuizCreationPage: React.FC = () => {
                                                 <div
                                                     key={note.id}
                                                     className={`p-6 rounded-2xl border-2 transition-all ${note.hasQuiz
-                                                        ? 'bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed'
+                                                        ? 'bg-white border-gray-200 cursor-default'
                                                         : 'bg-white border-gray-200 hover:border-purple-300 hover:shadow-lg cursor-pointer'
                                                         }`}
                                                     onClick={() => !note.hasQuiz && handleSelectNote(note)}
@@ -391,10 +397,23 @@ export const QuizCreationPage: React.FC = () => {
                                                         <span className="text-gray-600 font-medium">{note.topic}</span>
                                                     </div>
 
-                                                    {!note.hasQuiz && (
+                                                    {!note.hasQuiz ? (
                                                         <div className="mt-4 pt-4 border-t border-gray-100">
                                                             <button className="text-sm font-bold text-purple-600 hover:text-purple-700">
                                                                 Create Quiz for this Note →
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="mt-4 pt-4 border-t border-gray-100">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleEditQuiz(note);
+                                                                }}
+                                                                className="text-sm font-bold text-green-600 hover:text-green-700 flex items-center space-x-2"
+                                                            >
+                                                                <span>Edit Quiz</span>
+                                                                <span>→</span>
                                                             </button>
                                                         </div>
                                                     )}

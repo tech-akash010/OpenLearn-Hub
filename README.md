@@ -35,6 +35,8 @@ To create an open, collaborative ecosystem where knowledge flows freely between 
 - **YouTube Channel Integration**: Curated playlists from educational channels (CodeWithHarry, Khan Academy, etc.)
 - **Course Platform Links**: Direct integration with Udemy, Coursera, NPTEL, edX, and YouTube courses
 - **Competitive Exam Prep**: Dedicated paths for JEE, NEET, and other exams
+- **Integrated Video Player**: Seamless video playback within subtopic cards and content details
+
 
 ### 👥 **Subscription & Follow System**
 

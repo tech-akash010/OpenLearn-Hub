@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { HardDrive, Folder, FileText, ChevronRight, ChevronDown, Upload as UploadIcon, Download, Globe, Lock, Search, ArrowLeft, Home, MoreVertical } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { HardDrive, Folder, FileText, ChevronRight, ChevronDown, Upload as UploadIcon, Download, Globe, Lock, Search, ArrowLeft, Home, MoreVertical, Edit, Youtube, PlayCircle, Share2 } from 'lucide-react';
 import { authService } from '@/services/auth/authService';
 
 interface DriveExplorerProps {
@@ -82,7 +83,8 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
                 path: 'Operating Systems/Memory Management/Paging',
                 notes: [
                     { id: '6', fileName: 'Paging Concepts.pdf', savedAt: '2024-01-22', size: '2.9 MB' },
-                    { id: '7', fileName: 'Page Replacement.pdf', savedAt: '2024-01-23', size: '2.1 MB' }
+                    { id: '7', fileName: 'Page Replacement.pdf', savedAt: '2024-01-23', size: '2.1 MB' },
+                    { id: 'v1', fileName: 'Paging Visualization', savedAt: '2024-01-22', size: '15 min', fileType: 'youtube', url: 'https://www.youtube.com/watch?v=UDWoV8aNggY' }
                 ]
             },
             {
@@ -96,7 +98,8 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
             {
                 path: 'Udemy/Angela Yu/Web Development Bootcamp/HTML Basics',
                 notes: [
-                    { id: '8', fileName: 'HTML Tags.pdf', savedAt: '2024-01-25', size: '1.5 MB' }
+                    { id: '8', fileName: 'HTML Tags.pdf', savedAt: '2024-01-25', size: '1.5 MB' },
+                    { id: 'v2', fileName: 'HTML Structure Walkthrough', savedAt: '2024-01-25', size: '20 min', fileType: 'video', url: 'https://www.udemy.com/course/web-development-bootcamp/' }
                 ]
             },
             {
@@ -108,7 +111,8 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
             {
                 path: 'Coursera/Andrew Ng/Machine Learning/Week 1',
                 notes: [
-                    { id: '9', fileName: 'ML Introduction.pdf', savedAt: '2024-01-26', size: '3.2 MB' }
+                    { id: '9', fileName: 'ML Introduction.pdf', savedAt: '2024-01-26', size: '3.2 MB' },
+                    { id: 'v3', fileName: 'Supervised Learning Lecture', savedAt: '2024-01-26', size: '45 min', fileType: 'video', url: 'https://www.coursera.org/learn/machine-learning' }
                 ]
             },
             {
@@ -193,6 +197,69 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
         setCurrentPath([]); // Reset path on tab switch
     };
 
+    const navigate = useNavigate();
+
+    // Handle Edit
+    const handleEdit = (e: React.MouseEvent, item: FileNode) => {
+        e.stopPropagation();
+
+        // Find the parent entry in mock data to get path info
+        const sourceData = MOCK_DRIVE_DATA[activeTab];
+        let parentEntry = null;
+
+        if (Array.isArray(sourceData)) {
+            for (const entry of sourceData) {
+                if (entry.notes.some(n => n.id === item.id)) {
+                    parentEntry = entry;
+                    break;
+                }
+            }
+        }
+
+        if (!parentEntry) return;
+
+        const pathParts = parentEntry.path.split('/');
+        let initialData: any = {};
+
+        if (activeTab === 'community-uploads') {
+            // Path: Subject/Topic/Subtopic
+            // We mock the IDs as the names for simplicity in this demo context
+            initialData = {
+                subject: { id: pathParts[0].toLowerCase(), name: pathParts[0] },
+                topic: { id: pathParts[1].toLowerCase(), title: pathParts[1] },
+                subtopic: { id: pathParts[2].toLowerCase(), title: pathParts[2] },
+                title: item.name.replace(/\.[^/.]+$/, ""), // remove extension
+                file: { name: item.name } // Mock file object
+            };
+        } else if (activeTab === 'course-uploads') {
+            // Path: Platform/Course/Chapter
+            initialData = {
+                platform: pathParts[0],
+                courseName: pathParts[1],
+                chapter: pathParts[2],
+                title: item.name.replace(/\.[^/.]+$/, ""),
+                file: { name: item.name }
+            };
+        }
+
+        navigate('/notes/upload', {
+            state: {
+                initialType: activeTab === 'community-uploads' ? 'community' : 'course',
+                editMode: true,
+                initialData
+            }
+        });
+    };
+
+    // Handle Share
+    const handleShare = (e: React.MouseEvent, item: FileNode) => {
+        e.stopPropagation();
+        // In a real app, this would generate a public link
+        const shareUrl = `https://openlearn.hub/share/${item.id}`;
+        navigator.clipboard.writeText(shareUrl);
+        alert(`Link copied to clipboard: ${shareUrl}`);
+    };
+
     // Filter by search query
     const filteredContents = folderContents.filter(item =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -210,6 +277,8 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
         if (a.type === b.type) return a.name.localeCompare(b.name);
         return a.type === 'folder' ? -1 : 1;
     });
+
+    const isEditableTab = activeTab === 'community-uploads' || activeTab === 'course-uploads';
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -314,7 +383,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
                                 {sortedContents.map((item) => (
                                     <div
                                         key={item.name}
-                                        onClick={() => item.type === 'folder' ? enterFolder(item.name) : null}
+                                        onClick={() => item.type === 'folder' ? enterFolder(item.name) : (item.type === 'file' && item.data?.url) ? window.open(item.data.url, '_blank') : null}
                                         className={`
                                             group relative p-4 rounded-2xl border transition-all cursor-pointer
                                             ${item.type === 'folder'
@@ -326,14 +395,40 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
                                         <div className="flex items-start justify-between mb-3">
                                             <div className={`
                                                 w-10 h-10 rounded-xl flex items-center justify-center
-                                                ${item.type === 'folder' ? 'bg-blue-100 text-blue-600' : 'bg-red-50 text-red-500'}
+                                                ${item.type === 'folder' ? 'bg-blue-100 text-blue-600' :
+                                                    item.data?.fileType === 'youtube' ? 'bg-red-50 text-red-600' :
+                                                        item.data?.fileType === 'video' ? 'bg-purple-50 text-purple-600' :
+                                                            'bg-red-50 text-red-500'}
                                             `}>
-                                                {item.type === 'folder' ? <Folder size={20} /> : <FileText size={20} />}
+                                                {item.type === 'folder' ? <Folder size={20} /> :
+                                                    item.data?.fileType === 'youtube' ? <Youtube size={20} /> :
+                                                        item.data?.fileType === 'video' ? <PlayCircle size={20} /> :
+                                                            <FileText size={20} />}
                                             </div>
                                             {item.type === 'file' && (
-                                                <button className="text-gray-300 hover:text-gray-600">
-                                                    <MoreVertical size={16} />
-                                                </button>
+                                                <div className="flex space-x-1">
+                                                    {(activeTab === 'community-downloads' || activeTab === 'community-uploads') && (
+                                                        <button
+                                                            onClick={(e) => handleShare(e, item)}
+                                                            className="text-gray-300 hover:text-blue-600 p-1 hover:bg-blue-50 rounded"
+                                                            title="Share Item"
+                                                        >
+                                                            <Share2 size={16} />
+                                                        </button>
+                                                    )}
+                                                    {isEditableTab && (
+                                                        <button
+                                                            onClick={(e) => handleEdit(e, item)}
+                                                            className="text-gray-300 hover:text-blue-600 p-1 hover:bg-blue-50 rounded"
+                                                            title="Edit Note"
+                                                        >
+                                                            <Edit size={16} />
+                                                        </button>
+                                                    )}
+                                                    <button className="text-gray-300 hover:text-gray-600 p-1 hover:bg-gray-50 rounded">
+                                                        <MoreVertical size={16} />
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
 

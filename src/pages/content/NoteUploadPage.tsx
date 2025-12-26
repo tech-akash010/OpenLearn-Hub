@@ -8,14 +8,17 @@ import { CourseUploadForm } from '@/components/forms/upload/CourseUploadForm';
 import { ShareableLink } from '@/components/ui/ShareableLink';
 import { UploadWizard } from '@/components/forms/upload/UploadWizard';
 import { UploadedDocument } from '@/types';
+import { addDemoContent, DEMO_CONTENTS } from '@/data/demoContents';
 
 export const NoteUploadPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const user = authService.getUser();
 
-    // Get initial type from navigation state if available
+    // Get initial type and edit data from navigation state if available
     const initialType = location.state?.initialType as 'community' | 'course' | undefined;
+    const editMode = location.state?.editMode || false;
+    const initialData = location.state?.initialData || null;
 
     const [uploadType, setUploadType] = useState<'community' | 'course' | null>(initialType || null);
     const [uploadComplete, setUploadComplete] = useState(false);
@@ -125,6 +128,34 @@ export const NoteUploadPage: React.FC = () => {
     const handleCourseUploadComplete = (data: any) => {
         console.log('Course upload completed:', data);
         setNoteTitle(data.title);
+
+        const newNoteId = data.noteId || `course_${Date.now()}`;
+        setGeneratedNoteId(newNoteId);
+
+        // Add to demo contents for immediate access
+        addDemoContent({
+            id: newNoteId,
+            title: data.title,
+            description: data.description || '',
+            organization: {
+                primaryPath: 'course',
+                coursePath: {
+                    provider: 'OpenLearn',
+                    instructor: user.name,
+                    courseName: data.subject || 'General Course',
+                    topic: data.topic || 'General Topic',
+                    resourceTitle: data.title
+                }
+            },
+            uploadedBy: user.name,
+            uploadedAt: new Date().toISOString(),
+            views: 0,
+            likes: 0,
+            downloads: 0,
+            videoUrl: data.videoUrl
+        });
+
+        setUploadComplete(true);
     };
 
     // Show upload type selector first
@@ -138,6 +169,7 @@ export const NoteUploadPage: React.FC = () => {
             <CourseUploadForm
                 onComplete={handleCourseUploadComplete}
                 onBack={() => setUploadType(null)}
+                initialData={initialData}
             />
         );
     }
@@ -206,6 +238,7 @@ export const NoteUploadPage: React.FC = () => {
                     }
                 }}
                 onComplete={handleCommunityWizardComplete}
+                initialData={initialData}
             />
         );
     }

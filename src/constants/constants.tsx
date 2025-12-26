@@ -35,9 +35,9 @@ export const INITIAL_TOPICS: Topic[] = [
 ];
 
 export const INITIAL_SUBTOPICS: Subtopic[] = [
-  { id: 'scheduling', topicId: 'os', title: 'Process Scheduling', description: 'Strategies used by the OS to allocate CPU time to active processes.', status: 'verified' },
-  { id: 'memory', topicId: 'os', title: 'Memory Management', description: 'Mapping logical addresses to physical memory and handling swapping.', status: 'verified' },
-  { id: 'graphs', topicId: 'dsa', title: 'Graph Theory', description: 'Studying nodes and edges to model network structures.', status: 'verified' },
+  { id: 'scheduling', topicId: 'os', title: 'Process Scheduling', description: 'Strategies used by the OS to allocate CPU time to active processes.', status: 'verified', videoUrl: 'https://www.youtube.com/watch?v=UK1kM2Wq51k' },
+  { id: 'memory', topicId: 'os', title: 'Memory Management', description: 'Mapping logical addresses to physical memory and handling swapping.', status: 'verified', videoUrl: 'https://www.youtube.com/watch?v=5lastS8p5kU' },
+  { id: 'graphs', topicId: 'dsa', title: 'Graph Theory', description: 'Studying nodes and edges to model network structures.', status: 'verified', videoUrl: 'https://www.youtube.com/watch?v=59fUtYYz7ZU' },
 ];
 
 export const INITIAL_CONTENT: ContentItem[] = [
@@ -49,9 +49,9 @@ export const INITIAL_CONTENT: ContentItem[] = [
     title: 'Deep Dive: Scheduling Algorithms',
     body: `## Core Scheduling Strategies\n\n### 1. FCFS (First Come First Served)\nThe simplest non-preemptive algorithm. While fair in order, it often leads to the "convoy effect" where short processes wait behind long ones.\n\n### 2. SJF (Shortest Job First)\nOptimal for minimizing average wait time. However, it requires knowing CPU burst times in advance, which is rarely possible.\n\n### 3. Round Robin (RR)\nThe standard for time-sharing systems. It uses a fixed "Time Quantum" to ensure no process starves.`,
     author: 'pro_coder_99',
-    votes: 850,
     readiness: 95,
     lastUpdated: '2024-05-20',
-    difficulty: Difficulty.Intermediate
+    difficulty: Difficulty.Intermediate,
+    videoUrl: 'https://www.youtube.com/watch?v=UK1kM2Wq51k'
   }
 ];

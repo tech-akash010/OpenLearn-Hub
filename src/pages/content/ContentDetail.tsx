@@ -17,7 +17,8 @@ import {
   Loader2,
   Bookmark,
   Lock,
-  Info
+  Info,
+  Youtube
 } from 'lucide-react';
 import { driveSyncService } from '@/services/drive/driveSyncService';
 import { geminiService } from '@/services/ai/geminiService';
@@ -225,6 +226,28 @@ export const ContentDetail: React.FC = () => {
                   {/* Main Content Body */}
                   <div className="p-10 md:p-16">
                     <h2 className="text-4xl font-black text-gray-900 mb-10 leading-[1.1] tracking-tight">{item.title}</h2>
+
+                    {/* Video Widget */}
+                    {item.videoUrl && (
+                      <div className="mb-12 bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl shadow-blue-900/20">
+                        <div className="flex items-center px-8 py-4 bg-white/5 border-b border-white/10 space-x-3">
+                          <Youtube size={20} className="text-red-500" />
+                          <span className="text-gray-200 text-sm font-bold uppercase tracking-widest">Video Lesson</span>
+                        </div>
+                        <div className="aspect-video w-full">
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            src={item.videoUrl.replace('watch?v=', 'embed/')}
+                            title={item.title}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="w-full h-full"
+                          ></iframe>
+                        </div>
+                      </div>
+                    )}
 
                     {/* AI Summary Widget */}
                     <div className="mb-16 bg-blue-50/50 rounded-[2.5rem] border border-blue-100 p-8 md:p-10 relative overflow-hidden group">

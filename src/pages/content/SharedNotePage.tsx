@@ -104,6 +104,19 @@ Process synchronization is the task of coordinating the execution of processes i
                         <h1 className="text-4xl font-black text-gray-900 leading-[1.1] tracking-tight">{noteData.title}</h1>
                     </div>
 
+                    {/* Video Player */}
+                    {foundContent?.videoUrl && (
+                        <div className="mb-12 rounded-[2rem] overflow-hidden bg-gray-900 aspect-video shadow-2xl shadow-blue-900/10 ring-4 ring-gray-50">
+                            <iframe
+                                src={foundContent.videoUrl}
+                                className="w-full h-full"
+                                title={noteData.title}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        </div>
+                    )}
+
                     <div className="prose prose-blue prose-xl max-w-none text-gray-700 font-medium leading-[1.8]">
                         {noteData.content.split('\n').map((line, i) => (
                             line.startsWith('##') ? <h2 key={i} className="text-3xl font-black mt-16 mb-8 text-gray-900 border-b-2 border-gray-50 pb-4">{line.replace('## ', '')}</h2> :
