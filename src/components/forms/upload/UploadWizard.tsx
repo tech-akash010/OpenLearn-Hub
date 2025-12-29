@@ -301,6 +301,12 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete,
       topic,
       subtopic,
       title: selection.title,
+      description: selection.sourceMetadata?.selfWrittenSource?.description ||
+        selection.sourceMetadata?.bookOtherSource?.description ||
+        selection.content?.substring(0, 200) ||
+        'Uploaded content',
+      videoUrl: selection.sourceMetadata?.youtubeSource?.url,
+      contentId: `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       quiz: selection.attachedQuiz
     });
 

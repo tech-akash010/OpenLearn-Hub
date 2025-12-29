@@ -292,10 +292,20 @@ export interface DriveItem {
   topicName: string;
   subtopicName: string;
   title: string;
+  description?: string; // Content description for card display
+  videoUrl?: string; // YouTube/video URL for embedded playback
+  contentId?: string; // Reference to original content
   source: DriveSource;
   timestamp: string;
   mimeType: string;
   size?: string;
+  // Firebase integration fields
+  syncStatus?: 'pending' | 'synced' | 'failed' | 'local-only';
+  firebaseUrl?: string;
+  firebasePath?: string;
+  allowLocalDownload?: boolean; // true for own captures, false for others' course notes
+  uploadedBy?: string; // userId of uploader
+  isCourseContent?: boolean; // true if this is course-related content
 }
 
 export interface ContentItem {

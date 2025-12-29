@@ -35,8 +35,9 @@ const loadInitialContents = (): DemoContent[] => {
         console.error('Failed to load from localStorage', e);
     }
     return [
+        // SUBJECT-WISE: Array Implementation
         {
-            id: 'content_1',
+            id: 'content_1_subject',
             title: 'Array Implementation in C',
             description: 'Complete guide to implementing arrays in C programming with examples',
             organization: {
@@ -46,26 +47,6 @@ const loadInitialContents = (): DemoContent[] => {
                     coreTopic: 'Data Structures',
                     subtopic: 'Arrays',
                     resourceTitle: 'Array Implementation in C'
-                },
-                universityPath: {
-                    university: 'IIT Bombay',
-                    semester: '3',
-                    department: 'Computer Science & Engineering (CSE)',
-                    subject: 'Data Structures and Algorithms',
-                    topic: 'Arrays and Linked Lists'
-                },
-                channelPath: {
-                    channelName: 'CodeWithHarry',
-                    playlistName: 'DSA Full Course',
-                    topic: 'Arrays',
-                    resourceTitle: 'Array Implementation Notes'
-                },
-                coursePath: {
-                    provider: 'YouTube',
-                    instructor: 'CodeWithHarry',
-                    courseName: 'DSA Full Course',
-                    topic: 'Arrays',
-                    resourceTitle: 'Array Implementation Notes'
                 }
             },
             uploadedBy: 'Rahul Kumar',
@@ -75,44 +56,90 @@ const loadInitialContents = (): DemoContent[] => {
             downloads: 342,
             videoUrl: 'https://www.youtube.com/embed/1uADAjweDwk'
         },
+        // UNIVERSITY-WISE: Array Implementation (IIT Bombay)
         {
-            id: 'content_2',
-            title: 'Binary Search Trees Explained',
-            description: 'Comprehensive notes on BST operations, traversals, and applications',
+            id: 'content_1_university',
+            title: 'Array Implementation in C - IIT Bombay Lecture',
+            description: 'IIT Bombay CSE lecture on implementing arrays in C programming',
             organization: {
                 primaryPath: 'university',
-                subjectPath: {
-                    subject: 'Computer Science',
-                    coreTopic: 'Data Structures',
-                    subtopic: 'Trees',
-                    resourceTitle: 'Binary Search Trees Explained'
-                },
+                universityPath: {
+                    university: 'IIT Bombay',
+                    semester: '3',
+                    department: 'Computer Science & Engineering (CSE)',
+                    subject: 'Data Structures and Algorithms',
+                    topic: 'Arrays and Linked Lists'
+                }
+            },
+            uploadedBy: 'IIT Bombay CSE',
+            uploadedAt: '2024-01-15T10:30:00Z',
+            views: 850,
+            likes: 67,
+            downloads: 230,
+            videoUrl: 'https://www.youtube.com/embed/1uADAjweDwk'
+        },
+        // CHANNEL-WISE: Array Implementation (CodeWithHarry)
+        {
+            id: 'content_1_channel',
+            title: 'Array Implementation in C - CodeWithHarry',
+            description: 'CodeWithHarry DSA course: Complete guide to implementing arrays in C',
+            organization: {
+                primaryPath: 'channel',
+                channelPath: {
+                    channelName: 'CodeWithHarry',
+                    playlistName: 'DSA Full Course',
+                    topic: 'Arrays',
+                    resourceTitle: 'Array Implementation Notes'
+                }
+            },
+            uploadedBy: 'CodeWithHarry',
+            uploadedAt: '2024-01-15T10:30:00Z',
+            views: 2100,
+            likes: 156,
+            downloads: 450,
+            videoUrl: 'https://www.youtube.com/embed/1uADAjweDwk'
+        },
+        // UNIVERSITY-WISE: Binary Search Trees (IIT Delhi)
+        {
+            id: 'content_2_university',
+            title: 'Binary Search Trees - IIT Delhi Lecture',
+            description: 'IIT Delhi CSE lecture on BST operations, traversals, and applications',
+            organization: {
+                primaryPath: 'university',
                 universityPath: {
                     university: 'IIT Delhi',
                     semester: '4',
                     department: 'Computer Science & Engineering (CSE)',
                     subject: 'Advanced Data Structures',
                     topic: 'Binary Search Trees'
-                },
+                }
+            },
+            uploadedBy: 'IIT Delhi CSE',
+            uploadedAt: '2024-01-18T14:20:00Z',
+            views: 1200,
+            likes: 92,
+            downloads: 340,
+            videoUrl: 'https://www.youtube.com/embed/pTB0EiFlISw'
+        },
+        // CHANNEL-WISE: Binary Search Trees (Abdul Bari)
+        {
+            id: 'content_2_channel',
+            title: 'Binary Search Trees - Abdul Bari Algorithms Course',
+            description: 'Abdul Bari comprehensive tutorial on BST operations, traversals, and applications',
+            organization: {
+                primaryPath: 'channel',
                 channelPath: {
                     channelName: 'Abdul Bari',
                     playlistName: 'Algorithms',
                     topic: 'Trees',
                     resourceTitle: 'BST Lecture Notes'
-                },
-                coursePath: {
-                    provider: 'Udemy',
-                    instructor: 'Abdul Bari',
-                    courseName: 'Mastering Data Structures & Algorithms',
-                    topic: 'Trees and BST',
-                    resourceTitle: 'BST Lecture Notes'
                 }
             },
-            uploadedBy: 'Priya Sharma',
+            uploadedBy: 'Abdul Bari',
             uploadedAt: '2024-01-18T14:20:00Z',
-            views: 2100,
-            likes: 156,
-            downloads: 567,
+            views: 3400,
+            likes: 245,
+            downloads: 780,
             videoUrl: 'https://www.youtube.com/embed/pTB0EiFlISw'
         },
         {
@@ -148,10 +175,11 @@ const loadInitialContents = (): DemoContent[] => {
             downloads: 890,
             videoUrl: 'https://www.youtube.com/embed/wxds6MAtUQ0'
         },
+        // SUBJECT-WISE: OS Process Scheduling
         {
-            id: 'content_4',
+            id: 'content_4_subject',
             title: 'Operating Systems - Process Scheduling',
-            description: 'FCFS, SJF, Round Robin, and Priority scheduling algorithms',
+            description: 'FCFS, SJF, Round Robin, and Priority scheduling algorithms explained',
             organization: {
                 primaryPath: 'subject',
                 subjectPath: {
@@ -159,72 +187,96 @@ const loadInitialContents = (): DemoContent[] => {
                     coreTopic: 'Operating Systems',
                     subtopic: 'Process Management',
                     resourceTitle: 'Process Scheduling Algorithms'
-                },
+                }
+            },
+            uploadedBy: 'Sneha Reddy',
+            uploadedAt: '2024-01-22T11:45:00Z',
+            views: 1200,
+            likes: 85,
+            downloads: 250
+        },
+        // UNIVERSITY-WISE: OS Process Scheduling (IIT Madras)
+        {
+            id: 'content_4_university',
+            title: 'Process Scheduling - IIT Madras OS Course',
+            description: 'IIT Madras lecture on CPU scheduling algorithms: FCFS, SJF, Round Robin',
+            organization: {
+                primaryPath: 'university',
                 universityPath: {
                     university: 'IIT Madras',
                     semester: '5',
                     department: 'Computer Science & Engineering (CSE)',
                     subject: 'Operating Systems',
                     topic: 'CPU Scheduling'
-                },
+                }
+            },
+            uploadedBy: 'IIT Madras CSE',
+            uploadedAt: '2024-01-22T11:45:00Z',
+            views: 980,
+            likes: 72,
+            downloads: 210
+        },
+        // CHANNEL-WISE: OS Process Scheduling (Gate Smashers)
+        {
+            id: 'content_4_channel',
+            title: 'Process Scheduling Algorithms - Gate Smashers',
+            description: 'Gate Smashers complete guide to OS scheduling algorithms with examples',
+            organization: {
+                primaryPath: 'channel',
                 channelPath: {
                     channelName: 'Gate Smashers',
                     playlistName: 'Operating Systems',
                     topic: 'Process Scheduling',
                     resourceTitle: 'Scheduling Algorithms Notes'
-                },
-                coursePath: {
-                    provider: 'YouTube',
-                    instructor: 'Gate Smashers',
-                    courseName: 'Operating Systems Complete Course',
-                    topic: 'Process Scheduling',
-                    resourceTitle: 'Scheduling Algorithms Notes'
                 }
             },
-            uploadedBy: 'Sneha Reddy',
+            uploadedBy: 'Gate Smashers',
             uploadedAt: '2024-01-22T11:45:00Z',
-            views: 1890,
-            likes: 134,
-            downloads: 410
+            views: 2800,
+            likes: 198,
+            downloads: 620
         },
+        // UNIVERSITY-WISE: Database Normalization (BITS Pilani)
         {
-            id: 'content_5',
-            title: 'Database Normalization Forms',
-            description: '1NF, 2NF, 3NF, and BCNF with examples and practice problems',
+            id: 'content_5_university',
+            title: 'Database Normalization - BITS Pilani DBMS Course',
+            description: 'BITS Pilani lecture on 1NF, 2NF, 3NF, and BCNF with examples',
             organization: {
                 primaryPath: 'university',
-                subjectPath: {
-                    subject: 'Computer Science',
-                    coreTopic: 'Database Management',
-                    subtopic: 'Normalization',
-                    resourceTitle: 'Database Normalization Forms'
-                },
                 universityPath: {
                     university: 'BITS Pilani',
                     semester: '4',
                     department: 'Computer Science & Engineering (CSE)',
                     subject: 'Database Management Systems',
                     topic: 'Normalization'
-                },
+                }
+            },
+            uploadedBy: 'BITS Pilani CSE',
+            uploadedAt: '2024-01-25T16:00:00Z',
+            views: 1650,
+            likes: 112,
+            downloads: 380,
+            videoUrl: 'https://www.youtube.com/embed/1UrYXuJpvyo'
+        },
+        // CHANNEL-WISE: Database Normalization (Jenny's Lectures)
+        {
+            id: 'content_5_channel',
+            title: 'Database Normalization Forms - Jenny\'s Lectures',
+            description: 'Jenny\'s Lectures comprehensive guide to 1NF, 2NF, 3NF, BCNF with practice problems',
+            organization: {
+                primaryPath: 'channel',
                 channelPath: {
                     channelName: 'Jenny\'s Lectures',
                     playlistName: 'DBMS Complete Course',
                     topic: 'Normalization',
                     resourceTitle: 'Normalization Forms Explained'
-                },
-                coursePath: {
-                    provider: 'Udemy',
-                    instructor: 'Tim Buchalka',
-                    courseName: 'The Complete SQL Bootcamp',
-                    topic: 'Database Normalization',
-                    resourceTitle: 'Normalization Forms Explained'
                 }
             },
-            uploadedBy: 'Vikram Singh',
+            uploadedBy: 'Jenny\'s Lectures',
             uploadedAt: '2024-01-25T16:00:00Z',
-            views: 2750,
-            likes: 198,
-            downloads: 620,
+            views: 3200,
+            likes: 234,
+            downloads: 710,
             videoUrl: 'https://www.youtube.com/embed/1UrYXuJpvyo'
         },
         {
@@ -300,10 +352,11 @@ const loadInitialContents = (): DemoContent[] => {
             downloads: 945,
             videoUrl: 'https://www.youtube.com/embed/TNhaISOUy6Q' // User provided React Hooks video
         },
+        // SUBJECT-WISE: OSI Model
         {
-            id: 'content_8',
+            id: 'content_8_subject',
             title: 'Computer Networks - OSI Model',
-            description: 'All 7 layers of OSI model with protocols and examples',
+            description: 'All 7 layers of OSI model with protocols and examples explained',
             organization: {
                 primaryPath: 'subject',
                 subjectPath: {
@@ -311,40 +364,56 @@ const loadInitialContents = (): DemoContent[] => {
                     coreTopic: 'Computer Networks',
                     subtopic: 'Network Models',
                     resourceTitle: 'OSI Model Explained'
-                },
+                }
+            },
+            uploadedBy: 'Kavya Iyer',
+            uploadedAt: '2024-02-03T15:20:00Z',
+            views: 1640,
+            likes: 114,
+            downloads: 410,
+            videoUrl: 'https://www.youtube.com/embed/vv4y_uOneC0'
+        },
+        // UNIVERSITY-WISE: OSI Model (IIT Kanpur)
+        {
+            id: 'content_8_university',
+            title: 'OSI and TCP/IP Models - IIT Kanpur Networks Course',
+            description: 'IIT Kanpur lecture on OSI model layers, protocols, and TCP/IP comparison',
+            organization: {
+                primaryPath: 'university',
                 universityPath: {
                     university: 'IIT Kanpur',
                     semester: '5',
                     department: 'Computer Science & Engineering (CSE)',
                     subject: 'Computer Networks',
                     topic: 'OSI and TCP/IP Models'
-                },
+                }
+            },
+            uploadedBy: 'IIT Kanpur CSE',
+            uploadedAt: '2024-02-03T15:20:00Z',
+            views: 1420,
+            likes: 98,
+            downloads: 340,
+            videoUrl: 'https://www.youtube.com/embed/vv4y_uOneC0'
+        },
+        // CHANNEL-WISE: OSI Model (Neso Academy)
+        {
+            id: 'content_8_channel',
+            title: 'OSI Model Complete Guide - Neso Academy',
+            description: 'Neso Academy detailed explanation of all 7 OSI layers with protocols',
+            organization: {
+                primaryPath: 'channel',
                 channelPath: {
                     channelName: 'Neso Academy',
                     playlistName: 'Computer Networks',
                     topic: 'OSI Model',
                     resourceTitle: 'OSI Layers Complete Notes'
-                },
-                coursePath: {
-                    provider: 'NPTEL',
-                    instructor: 'IIT Kharagpur',
-                    courseName: 'Computer Networks and Internet Protocol',
-                    topic: 'OSI Reference Model',
-                    resourceTitle: 'OSI Layers Complete Notes'
-                },
-                competitiveExamPath: {
-                    exam: 'GATE',
-                    year: 'Target 2025',
-                    subject: 'Computer Science',
-                    topic: 'Computer Networks',
-                    resourceTitle: 'OSI Model for GATE'
                 }
             },
-            uploadedBy: 'Kavya Iyer',
+            uploadedBy: 'Neso Academy',
             uploadedAt: '2024-02-03T15:20:00Z',
-            views: 2890,
-            likes: 201,
-            downloads: 730,
+            views: 3850,
+            likes: 278,
+            downloads: 890,
             videoUrl: 'https://www.youtube.com/embed/vv4y_uOneC0'
         },
         {

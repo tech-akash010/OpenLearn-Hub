@@ -1,7 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HardDrive, Folder, FileText, ChevronRight, ChevronDown, Upload as UploadIcon, Download, Globe, Lock, Search, ArrowLeft, Home, MoreVertical, Edit, Youtube, PlayCircle, Share2 } from 'lucide-react';
+import { HardDrive, Folder, FileText, ChevronRight, ChevronDown, Upload as UploadIcon, Download, Globe, Lock, Search, ArrowLeft, Home, MoreVertical, Edit, Youtube, PlayCircle, Share2, Trash2 } from 'lucide-react';
 import { authService } from '@/services/auth/authService';
+import { driveSyncService } from '@/services/drive/driveSyncService';
+import { EnhancedContentCard } from '@/components/content/EnhancedContentCard';
+import { DemoContent } from '@/data/demoContents';
 
 interface DriveExplorerProps {
     userId: string;
@@ -35,106 +38,78 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
     // Check if user can upload (Bronze community contributors cannot)
     const canUpload = user ? authService.canUploadNotes(user) : true;
 
-    // Mock data - conditional based on user permissions
-    const MOCK_DRIVE_DATA = useMemo(() => ({
-        'community-uploads': canUpload ? [
-            {
-                path: 'DSA/Array/Array Implementation',
-                notes: [
-                    { id: '1', fileName: 'Array Basics.pdf', savedAt: '2024-01-15', size: '2.4 MB' },
-                    { id: '2', fileName: 'Dynamic Arrays.pdf', savedAt: '2024-01-16', size: '1.8 MB' }
-                ]
-            },
-            {
-                path: 'DSA/Linked List/Singly Linked List',
-                notes: [
-                    { id: '3', fileName: 'Linked List Operations.pdf', savedAt: '2024-01-18', size: '3.1 MB' }
-                ]
-            },
-            {
-                path: 'DSA/Array/Quizzes',
-                notes: [
-                    { id: 'q1', fileName: 'Array Quiz - Beginner.json', savedAt: '2024-01-19', size: '45 KB' }
-                ]
+    // Real data state
+    const [realItems, setRealItems] = useState<any[]>([]);
+
+    useEffect(() => {
+        const loadRealData = () => {
+            const items = driveSyncService.getDriveItems();
+            setRealItems(items);
+        };
+
+        loadRealData();
+        window.addEventListener('drive-sync', loadRealData);
+        return () => window.removeEventListener('drive-sync', loadRealData);
+    }, []);
+
+    // Transform flat items to folder structure
+    const driveData = useMemo(() => {
+        // Initialize empty structure
+        const data = {
+            'community-uploads': [] as any[],
+            'course-uploads': [] as any[],
+            'community-downloads': [] as any[],
+            'course-downloads': [] as any[]
+        };
+
+        realItems.forEach(item => {
+            // Determine category
+            let category: keyof typeof data = 'community-uploads';
+            if (item.source === 'Uploaded') {
+                category = item.isCourseContent ? 'course-uploads' : 'community-uploads';
+            } else {
+                category = item.isCourseContent ? 'course-downloads' : 'community-downloads';
             }
-        ] : [],
-        'course-uploads': canUpload ? [
-            {
-                path: 'Coursera/Python Zero to Hero/Chapter 1',
-                notes: [
-                    { id: '4', fileName: 'Python Introduction.pdf', savedAt: '2024-01-20', size: '4.2 MB' }
-                ]
-            },
-            {
-                path: 'Coursera/Python Zero to Hero/Chapter 1/Quizzes',
-                notes: [
-                    { id: 'q2', fileName: 'Python Basics Quiz.json', savedAt: '2024-01-21', size: '38 KB' }
-                ]
-            },
-            {
-                path: 'Udemy/Web Development Bootcamp/HTML Basics',
-                notes: [
-                    { id: '5', fileName: 'HTML Tags Guide.pdf', savedAt: '2024-01-21', size: '2.8 MB' }
-                ]
+
+            // Construct path: Subject/Topic/Subtopic
+            // We use names instead of IDs for the visible path
+            const path = `${item.subjectName}/${item.topicName}/${item.subtopicName}`;
+
+            // Find or create folder group
+            let folderGroup = data[category].find(g => g.path === path);
+            if (!folderGroup) {
+                folderGroup = {
+                    path: path,
+                    notes: []
+                };
+                data[category].push(folderGroup);
             }
-        ] : [],
-        'community-downloads': [
-            {
-                path: 'Operating Systems/Memory Management/Paging',
-                notes: [
-                    { id: '6', fileName: 'Paging Concepts.pdf', savedAt: '2024-01-22', size: '2.9 MB' },
-                    { id: '7', fileName: 'Page Replacement.pdf', savedAt: '2024-01-23', size: '2.1 MB' },
-                    { id: 'v1', fileName: 'Paging Visualization', savedAt: '2024-01-22', size: '15 min', fileType: 'youtube', url: 'https://www.youtube.com/watch?v=UDWoV8aNggY' }
-                ]
-            },
-            {
-                path: 'Operating Systems/Memory Management/Quizzes',
-                notes: [
-                    { id: 'q3', fileName: 'Memory Management Quiz.json', savedAt: '2024-01-24', size: '52 KB' }
-                ]
-            }
-        ],
-        'course-downloads': [
-            {
-                path: 'Udemy/Angela Yu/Web Development Bootcamp/HTML Basics',
-                notes: [
-                    { id: '8', fileName: 'HTML Tags.pdf', savedAt: '2024-01-25', size: '1.5 MB' },
-                    { id: 'v2', fileName: 'HTML Structure Walkthrough', savedAt: '2024-01-25', size: '20 min', fileType: 'video', url: 'https://www.udemy.com/course/web-development-bootcamp/' }
-                ]
-            },
-            {
-                path: 'Udemy/Angela Yu/Web Development Bootcamp/HTML Basics/Quizzes',
-                notes: [
-                    { id: 'q4', fileName: 'HTML Quiz - Advanced.json', savedAt: '2024-01-26', size: '41 KB' }
-                ]
-            },
-            {
-                path: 'Coursera/Andrew Ng/Machine Learning/Week 1',
-                notes: [
-                    { id: '9', fileName: 'ML Introduction.pdf', savedAt: '2024-01-26', size: '3.2 MB' },
-                    { id: 'v3', fileName: 'Supervised Learning Lecture', savedAt: '2024-01-26', size: '45 min', fileType: 'video', url: 'https://www.coursera.org/learn/machine-learning' }
-                ]
-            },
-            {
-                path: 'Coursera/Andrew Ng/Machine Learning/Week 1/Quizzes',
-                notes: [
-                    { id: 'q5', fileName: 'ML Week 1 Quiz.json', savedAt: '2024-01-27', size: '48 KB' }
-                ]
-            }
-        ]
-    }), [canUpload]);
+
+            // Add file to group
+            folderGroup.notes.push({
+                id: item.id,
+                fileName: item.name,
+                savedAt: item.timestamp.split(',')[0], // Just date part
+                size: item.size || 'Unknown',
+                fileType: item.mimeType === 'application/pdf' ? 'pdf' : 'file',
+                url: item.firebaseUrl // Keep reference if available
+            });
+        });
+
+        return data;
+    }, [realItems]);
 
     // Helper to build the file tree from flat paths
     const fileTree = useMemo(() => {
         const root: FolderNode = { type: 'folder', name: 'root', path: '', children: {} };
-        const data = MOCK_DRIVE_DATA[activeTab] || [];
+        const categoryData = driveData[activeTab] || [];
 
-        data.forEach(item => {
+        categoryData.forEach(item => {
             const parts = item.path.split('/');
             let current = root;
 
             // Build folder structure
-            parts.forEach((part, index) => {
+            parts.forEach((part: string, index: number) => {
                 if (!current.children[part]) {
                     const newPath = parts.slice(0, index + 1).join('/');
                     current.children[part] = {
@@ -151,20 +126,20 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
             });
 
             // Add files to the leaf folder
-            item.notes.forEach(note => {
+            item.notes.forEach((note: any) => {
                 current.children[note.id] = {
                     type: 'file',
                     id: note.id,
                     name: note.fileName,
                     size: note.size,
                     savedAt: note.savedAt,
-                    data: note
+                    data: { ...note, fileType: note.fileType || 'file' }
                 };
             });
         });
 
         return root;
-    }, [activeTab, MOCK_DRIVE_DATA]); // Rebuild when tab changes
+    }, [activeTab, driveData]);
 
     // Get contents of current path
     const folderContents = useMemo(() => {
@@ -178,6 +153,47 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
         }
         return current.type === 'folder' ? Object.values(current.children) : [];
     }, [fileTree, currentPath]);
+
+    // Convert DriveItem (FileNode) to DemoContent for card display
+    const convertToDemoContent = (fileNode: FileNode): DemoContent | null => {
+        // Find the original DriveItem from realItems
+        const driveItem = realItems.find(item => item.id === fileNode.id);
+        if (!driveItem) return null;
+
+        // Get actual user name instead of showing 'Unknown'
+        const currentUser = authService.getUser();
+        let uploaderName = 'Unknown';
+        if (driveItem.uploadedBy) {
+            if (driveItem.uploadedBy === currentUser?.id) {
+                uploaderName = currentUser.name;
+            } else {
+                // For other users, try to get name from uploadedBy field or use ID
+                uploaderName = driveItem.uploadedBy;
+            }
+        }
+
+        // Create DemoContent object from DriveItem
+        return {
+            id: driveItem.contentId || driveItem.id,
+            title: driveItem.title || fileNode.name.replace('.pdf', ''),
+            description: driveItem.description || 'Downloaded content',
+            organization: {
+                primaryPath: 'subject',
+                subjectPath: {
+                    subject: driveItem.subjectName,
+                    coreTopic: driveItem.topicName,
+                    subtopic: driveItem.subtopicName,
+                    resourceTitle: driveItem.title
+                }
+            },
+            uploadedBy: uploaderName,
+            uploadedAt: driveItem.timestamp || new Date().toISOString(),
+            views: 0,
+            likes: 0,
+            downloads: 0,
+            videoUrl: driveItem.videoUrl // YouTube URL will be embedded by EnhancedContentCard
+        } as DemoContent;
+    };
 
     // Handle navigation
     const enterFolder = (folderName: string) => {
@@ -204,12 +220,12 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
         e.stopPropagation();
 
         // Find the parent entry in mock data to get path info
-        const sourceData = MOCK_DRIVE_DATA[activeTab];
+        const sourceData = driveData[activeTab];
         let parentEntry = null;
 
         if (Array.isArray(sourceData)) {
             for (const entry of sourceData) {
-                if (entry.notes.some(n => n.id === item.id)) {
+                if (entry.notes.some((n: any) => n.id === item.id)) {
                     parentEntry = entry;
                     break;
                 }
@@ -295,16 +311,29 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
                         </div>
                     </div>
 
-                    {/* Search */}
-                    <div className="relative">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input
-                            type="text"
-                            placeholder="Search in current folder..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-14 pr-6 py-4 bg-white rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none font-medium transition-colors"
-                        />
+                    {/* Search & Actions */}
+                    <div className="flex items-center space-x-4">
+                        <button
+                            onClick={() => {
+                                if (confirm('Are you sure you want to clear all drive data? This cannot be undone.')) {
+                                    driveSyncService.clearAll();
+                                }
+                            }}
+                            className="p-4 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-colors"
+                            title="Clear All Data (Debug)"
+                        >
+                            <Trash2 size={20} />
+                        </button>
+                        <div className="relative flex-1">
+                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Search in current folder..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-14 pr-6 py-4 bg-white rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none font-medium transition-colors"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -379,77 +408,62 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
                                 <p className="text-lg font-medium">Empty folder</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                {sortedContents.map((item) => (
-                                    <div
-                                        key={item.name}
-                                        onClick={() => item.type === 'folder' ? enterFolder(item.name) : (item.type === 'file' && item.data?.url) ? window.open(item.data.url, '_blank') : null}
-                                        className={`
-                                            group relative p-4 rounded-2xl border transition-all cursor-pointer
-                                            ${item.type === 'folder'
-                                                ? 'bg-blue-50/50 border-blue-100 hover:border-blue-300 hover:shadow-md hover:bg-blue-50'
-                                                : 'bg-white border-gray-100 hover:border-gray-300 hover:shadow-md'
-                                            }
-                                        `}
-                                    >
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div className={`
-                                                w-10 h-10 rounded-xl flex items-center justify-center
-                                                ${item.type === 'folder' ? 'bg-blue-100 text-blue-600' :
-                                                    item.data?.fileType === 'youtube' ? 'bg-red-50 text-red-600' :
-                                                        item.data?.fileType === 'video' ? 'bg-purple-50 text-purple-600' :
-                                                            'bg-red-50 text-red-500'}
-                                            `}>
-                                                {item.type === 'folder' ? <Folder size={20} /> :
-                                                    item.data?.fileType === 'youtube' ? <Youtube size={20} /> :
-                                                        item.data?.fileType === 'video' ? <PlayCircle size={20} /> :
-                                                            <FileText size={20} />}
-                                            </div>
-                                            {item.type === 'file' && (
-                                                <div className="flex space-x-1">
-                                                    {(activeTab === 'community-downloads' || activeTab === 'community-uploads') && (
-                                                        <button
-                                                            onClick={(e) => handleShare(e, item)}
-                                                            className="text-gray-300 hover:text-blue-600 p-1 hover:bg-blue-50 rounded"
-                                                            title="Share Item"
-                                                        >
-                                                            <Share2 size={16} />
-                                                        </button>
-                                                    )}
-                                                    {isEditableTab && (
-                                                        <button
-                                                            onClick={(e) => handleEdit(e, item)}
-                                                            className="text-gray-300 hover:text-blue-600 p-1 hover:bg-blue-50 rounded"
-                                                            title="Edit Note"
-                                                        >
-                                                            <Edit size={16} />
-                                                        </button>
-                                                    )}
-                                                    <button className="text-gray-300 hover:text-gray-600 p-1 hover:bg-gray-50 rounded">
-                                                        <MoreVertical size={16} />
-                                                    </button>
+                            <>
+                                {/* Folders Grid */}
+                                {sortedContents.some(item => item.type === 'folder') && (
+                                    <div className="mb-6">
+                                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Folders</h3>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                            {sortedContents.filter(item => item.type === 'folder').map((item) => (
+                                                <div
+                                                    key={item.name}
+                                                    onClick={() => enterFolder(item.name)}
+                                                    className="group relative p-4 rounded-2xl border transition-all cursor-pointer bg-blue-50/50 border-blue-100 hover:border-blue-300 hover:shadow-md hover:bg-blue-50"
+                                                >
+                                                    <div className="flex flex-col items-center text-center">
+                                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100 text-blue-600 mb-2">
+                                                            <Folder size={24} />
+                                                        </div>
+                                                        <p className="font-bold text-gray-900 truncate w-full" title={item.name}>{item.name}</p>
+                                                        <div className="flex items-center space-x-1 mt-1 text-xs text-blue-600 font-medium">
+                                                            <span>Open</span>
+                                                            <ChevronRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            )}
+                                            ))}
                                         </div>
-
-                                        <p className="font-bold text-gray-900 truncate mb-1" title={item.name}>{item.name}</p>
-
-                                        {item.type === 'file' && (
-                                            <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-                                                <span>{item.size}</span>
-                                                <span>{item.savedAt}</span>
-                                            </div>
-                                        )}
-
-                                        {item.type === 'folder' && (
-                                            <div className="flex items-center space-x-1 mt-2 text-xs text-blue-600 font-medium">
-                                                <span>Open Folder</span>
-                                                <ChevronRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" />
-                                            </div>
-                                        )}
                                     </div>
-                                ))}
-                            </div>
+                                )}
+
+                                {/* Files as Content Cards */}
+                                {sortedContents.some(item => item.type === 'file') && (
+                                    <div>
+                                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Downloaded Notes</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {sortedContents.filter(item => item.type === 'file').map((item) => {
+                                                if (item.type !== 'file') return null;
+                                                const demoContent = convertToDemoContent(item);
+                                                if (!demoContent) return null;
+
+                                                return (
+                                                    <div key={item.id}>
+                                                        <EnhancedContentCard
+                                                            content={demoContent}
+                                                            onClick={() => {
+                                                                // Navigate to the note page if contentId exists
+                                                                if (demoContent.id) {
+                                                                    navigate(`/note/${demoContent.id}`);
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>

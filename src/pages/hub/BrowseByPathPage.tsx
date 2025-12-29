@@ -53,8 +53,8 @@ export const BrowseByPathPage: React.FC = () => {
             setSelectedGatedContent(content);
             setGatekeeperOpen(true);
         } else {
-            // Direct navigation for other tabs
-            navigate(`/note/${content.id}`);
+            // Pass browse context to note page so download knows which path to use
+            navigate(`/note/${content.id}?browseContext=${activeTab}`);
         }
     };
 

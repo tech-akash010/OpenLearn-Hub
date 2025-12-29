@@ -1,7 +1,20 @@
 
 import { DriveItem, DriveSource, Subject, Topic, Subtopic } from '@/types';
+import { syncMetadataToFirestore } from '@/services/storage/firebaseStorageService';
 
 const DRIVE_STORAGE_KEY = 'openlearn_drive_items';
+
+// Get current user ID
+function getCurrentUserId(): string | null {
+  const userStr = localStorage.getItem('openlearn_user');
+  if (!userStr) return null;
+  try {
+    const user = JSON.parse(userStr);
+    return user.id;
+  } catch {
+    return null;
+  }
+}
 
 export const driveSyncService = {
   getDriveItems(): DriveItem[] {
@@ -9,15 +22,20 @@ export const driveSyncService = {
     return stored ? JSON.parse(stored) : [];
   },
 
-  syncContribution(data: {
+  async syncContribution(data: {
     subject: Subject;
     topic: Topic | { title: string, id: string };
     subtopic: Subtopic | { title: string, id: string };
     title: string;
+    description?: string;
+    videoUrl?: string;
+    contentId?: string;
     quiz?: any;
+    isCourseContent?: boolean;
   }) {
     const items = this.getDriveItems();
     const fileName = `${data.subject.name}_${data.topic.title}_${data.subtopic.title}_${data.title}`.replace(/\s+/g, '_');
+    const userId = getCurrentUserId();
 
     const newItem: DriveItem = {
       id: `up_${Date.now()}`,
@@ -29,23 +47,42 @@ export const driveSyncService = {
       topicName: data.topic.title,
       subtopicName: data.subtopic.title,
       title: data.title,
+      description: data.description,
+      videoUrl: data.videoUrl,
+      contentId: data.contentId || `up_${Date.now()}`,
       source: DriveSource.Uploaded,
       timestamp: new Date().toLocaleString(),
       mimeType: 'application/pdf',
-      size: '1.2 MB'
+      size: '1.2 MB',
+      // Firestore fields
+      syncStatus: 'pending',
+      uploadedBy: userId || undefined,
+      isCourseContent: data.isCourseContent || false,
+      allowLocalDownload: true // Own uploads are always downloadable
     };
 
     localStorage.setItem(DRIVE_STORAGE_KEY, JSON.stringify([newItem, ...items]));
     window.dispatchEvent(new Event('drive-sync'));
+
+    // Sync to Firestore in background
+    if (userId) {
+      this.syncToFirestoreBackground(newItem);
+    }
   },
 
-  syncDownload(data: {
+  async syncDownload(data: {
     subject: Subject;
     topic: Topic;
     subtopic: Subtopic;
     title: string;
+    description?: string;
+    videoUrl?: string;
+    contentId?: string;
+    isCourseContent?: boolean;
+    uploadedBy?: string;
   }) {
     const items = this.getDriveItems();
+    const userId = getCurrentUserId();
 
     // Check if already downloaded to prevent duplicates
     const exists = items.find(i =>
@@ -57,6 +94,10 @@ export const driveSyncService = {
 
     const fileName = `${data.subject.name}_${data.topic.title}_${data.subtopic.title}_${data.title}`.replace(/\s+/g, '_');
 
+    // Determine if local download should be allowed
+    const isOwnContent = data.uploadedBy === userId;
+    const allowLocalDownload = !data.isCourseContent || isOwnContent;
+
     const newItem: DriveItem = {
       id: `dl_${Date.now()}`,
       name: `${fileName}.pdf`,
@@ -67,13 +108,68 @@ export const driveSyncService = {
       topicName: data.topic.title,
       subtopicName: data.subtopic.title,
       title: data.title,
+      description: data.description,
+      videoUrl: data.videoUrl,
+      contentId: data.contentId,
       source: DriveSource.Downloaded,
       timestamp: new Date().toLocaleString(),
       mimeType: 'application/pdf',
-      size: '850 KB'
+      size: '850 KB',
+      // Firestore fields
+      syncStatus: 'pending',
+      uploadedBy: data.uploadedBy,
+      isCourseContent: data.isCourseContent || false,
+      allowLocalDownload
     };
 
     localStorage.setItem(DRIVE_STORAGE_KEY, JSON.stringify([newItem, ...items]));
+    window.dispatchEvent(new Event('drive-sync'));
+
+    // Sync to Firestore in background
+    if (userId) {
+      this.syncToFirestoreBackground(newItem);
+    }
+  },
+
+  // Background sync to Firestore with error handling
+  async syncToFirestoreBackground(item: DriveItem) {
+    try {
+      const result = await syncMetadataToFirestore(item);
+
+      if (result.success) {
+        this.updateItemSyncStatus(item.id, 'synced');
+      } else {
+        this.updateItemSyncStatus(item.id, 'failed');
+      }
+    } catch (error) {
+      console.error('Background sync failed:', error);
+      this.updateItemSyncStatus(item.id, 'failed');
+    }
+  },
+
+  // Update sync status of an item
+  updateItemSyncStatus(itemId: string, status: 'pending' | 'synced' | 'failed' | 'local-only') {
+    const items = this.getDriveItems();
+    const updatedItems = items.map(item =>
+      item.id === itemId ? { ...item, syncStatus: status } : item
+    );
+    localStorage.setItem(DRIVE_STORAGE_KEY, JSON.stringify(updatedItems));
+    window.dispatchEvent(new Event('drive-sync'));
+  },
+
+  // Retry failed syncs
+  async retryFailedSyncs() {
+    const items = this.getDriveItems();
+    const failedItems = items.filter(item => item.syncStatus === 'failed');
+
+    for (const item of failedItems) {
+      await this.syncToFirestoreBackground(item);
+    }
+  },
+
+  // Clear all drive data (Debug/Demo purposes)
+  clearAll() {
+    localStorage.removeItem(DRIVE_STORAGE_KEY);
     window.dispatchEvent(new Event('drive-sync'));
   }
 };

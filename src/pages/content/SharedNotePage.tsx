@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Share2, Download, CheckCircle2, FileText, ArrowLeft, Bookmark, ThumbsUp, MessageSquare } from 'lucide-react';
 import { authService } from '@/services/auth/authService';
+import { driveSyncService } from '@/services/drive/driveSyncService';
+import { Subject, Topic, Subtopic, Difficulty } from '@/types';
+import { Toast, ToastType } from '@/components/ui/Toast';
 
 import { DEMO_CONTENTS } from '@/data/demoContents';
 
@@ -11,6 +14,21 @@ export const SharedNotePage: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const user = authService.getUser();
+
+    // Toast State
+    const [toast, setToast] = useState<{ visible: boolean; message: string; subMessage?: string; type: ToastType }>({
+        visible: false,
+        message: '',
+        type: 'success'
+    });
+
+    const showToast = (message: string, subMessage?: string, type: ToastType = 'success') => {
+        setToast({ visible: true, message, subMessage, type });
+    };
+
+    const closeToast = () => {
+        setToast(prev => ({ ...prev, visible: false }));
+    };
 
     useEffect(() => {
         // Simulate loading
@@ -55,8 +73,223 @@ Process synchronization is the task of coordinating the execution of processes i
         `.trim()
     };
 
+    const handleDownload = async () => {
+        if (!user) {
+            showToast('Authentication Required', 'Please log in to download content.', 'error');
+            return;
+        }
+
+        if (!foundContent) {
+            showToast('Error', 'Content details not found.', 'error');
+            return;
+        }
+
+        // 1. Extract FULL breadcrumb hierarchy based on browseContext
+        const org = foundContent.organization;
+
+        // Get browse context from URL (which browse tab user was on)
+        const searchParams = new URLSearchParams(window.location.search);
+        const browseContext = searchParams.get('browseContext') || org.primaryPath;
+
+        // Build FULL folder path array matching browse breadcrumb
+        let folderPath: string[] = [];
+
+        // Use browseContext to determine which hierarchical path to mirror
+        switch (browseContext) {
+            case 'trending':
+                // For trending, use the content's primary path classification
+                // This ensures trending downloads use the most appropriate folder structure
+                const trendingContext = org.primaryPath;
+                switch (trendingContext) {
+                    case 'university':
+                        if (org.universityPath) {
+                            folderPath = [
+                                org.universityPath.university,
+                                `Semester ${org.universityPath.semester}`,
+                                org.universityPath.department,
+                                org.universityPath.subject,
+                                org.universityPath.topic
+                            ];
+                        }
+                        break;
+                    case 'channel':
+                        if (org.channelPath) {
+                            folderPath = [
+                                org.channelPath.channelName,
+                                org.channelPath.playlistName,
+                                org.channelPath.topic
+                            ];
+                        }
+                        break;
+                    case 'competitive_exam':
+                        if (org.competitiveExamPath) {
+                            folderPath = [
+                                org.competitiveExamPath.exam,
+                                org.competitiveExamPath.year,
+                                org.competitiveExamPath.subject,
+                                org.competitiveExamPath.topic
+                            ];
+                        }
+                        break;
+                    case 'course':
+                        if (org.coursePath) {
+                            folderPath = [
+                                org.coursePath.provider,
+                                org.coursePath.instructor,
+                                org.coursePath.courseName,
+                                org.coursePath.topic
+                            ];
+                        }
+                        break;
+                    case 'subject':
+                    default:
+                        if (org.subjectPath) {
+                            folderPath = [
+                                org.subjectPath.subject,
+                                org.subjectPath.coreTopic,
+                                org.subjectPath.subtopic
+                            ];
+                        }
+                        break;
+                }
+                break;
+            case 'university':
+                if (org.universityPath) {
+                    // Mirror: University → Semester → Department → Subject → Topic
+                    folderPath = [
+                        org.universityPath.university,
+                        `Semester ${org.universityPath.semester}`,
+                        org.universityPath.department,
+                        org.universityPath.subject,
+                        org.universityPath.topic
+                    ];
+                }
+                break;
+            case 'channel':
+                if (org.channelPath) {
+                    // Mirror: Channel → Playlist → Topic
+                    folderPath = [
+                        org.channelPath.channelName,
+                        org.channelPath.playlistName,
+                        org.channelPath.topic
+                    ];
+                }
+                break;
+            case 'competitive_exam':
+                if (org.competitiveExamPath) {
+                    // Mirror: Exam → Year → Subject → Topic
+                    folderPath = [
+                        org.competitiveExamPath.exam,
+                        org.competitiveExamPath.year,
+                        org.competitiveExamPath.subject,
+                        org.competitiveExamPath.topic
+                    ];
+                }
+                break;
+            case 'course':
+                if (org.coursePath) {
+                    // Mirror: Provider → Instructor → Course → Topic
+                    folderPath = [
+                        org.coursePath.provider,
+                        org.coursePath.instructor,
+                        org.coursePath.courseName,
+                        org.coursePath.topic
+                    ];
+                }
+                break;
+            case 'subject':
+            default:
+                if (org.subjectPath) {
+                    // Mirror: Subject → CoreTopic → Subtopic
+                    folderPath = [
+                        org.subjectPath.subject,
+                        org.subjectPath.coreTopic,
+                        org.subjectPath.subtopic
+                    ];
+                }
+                break;
+        }
+
+        // Fallback: If extraction failed
+        if (folderPath.length === 0) {
+            if (org.subjectPath) {
+                folderPath = [
+                    org.subjectPath.subject,
+                    org.subjectPath.coreTopic,
+                    org.subjectPath.subtopic
+                ];
+            } else if (org.universityPath) {
+                folderPath = [
+                    org.universityPath.university,
+                    org.universityPath.subject,
+                    org.universityPath.topic
+                ];
+            } else {
+                folderPath = ["General", "Misc", "Resources"];
+            }
+        }
+
+        // TODO: Pass folderPath array to driveSyncService for recursive folder creation
+        // For now, use first 3 levels for compatibility with existing Subject/Topic/Subtopic structure
+        const [subjectName = "General", topicName = "Misc", subtopicName = "Resources"] = folderPath;
+
+        // Construct objects expected by driveSyncService
+        const subject: Subject = {
+            id: subjectName.toLowerCase().replace(/\s+/g, '-'),
+            name: subjectName,
+            icon: 'folder',
+            description: 'Generated from download',
+            status: 'verified'
+        };
+
+        const topic: Topic = {
+            id: topicName.toLowerCase().replace(/\s+/g, '-'),
+            subjectId: subject.id,
+            title: topicName,
+            description: 'Generated from download',
+            status: 'verified',
+            difficulty: Difficulty.Intermediate,
+            votes: 0,
+            lastUpdated: new Date().toISOString(),
+            content: '',
+            readiness: 100
+        };
+
+        const subtopic: Subtopic = {
+            id: subtopicName.toLowerCase().replace(/\s+/g, '-'),
+            topicId: topic.id,
+            title: subtopicName,
+            description: 'Generated from download',
+            status: 'verified'
+        };
+
+        // 2. Trigger Smart Sync with full content metadata
+        await driveSyncService.syncDownload({
+            subject,
+            topic,
+            subtopic,
+            title: foundContent.title,
+            description: foundContent.description,
+            videoUrl: foundContent.videoUrl,
+            contentId: foundContent.id,
+            isCourseContent: false, // It's community content validation
+            uploadedBy: foundContent.uploadedBy
+        });
+
+        // Show full breadcrumb path in toast message
+        const fullFolderPath = folderPath.join(' > ');
+        showToast('Downloaded to My Drive!', `Organized into: ${fullFolderPath}`, 'success');
+    };
+
     return (
         <div className="animate-in fade-in duration-700 max-w-5xl mx-auto pb-24 p-6">
+            <Toast
+                isVisible={toast.visible}
+                message={toast.message}
+                subMessage={toast.subMessage}
+                type={toast.type}
+                onClose={closeToast}
+            />
             {/* Header Navigation */}
             <button
                 onClick={() => navigate('/hub')}
@@ -138,7 +371,10 @@ Process synchronization is the task of coordinating the execution of processes i
                         </div>
                     </div>
                     <div className="flex space-x-4 w-full md:w-auto">
-                        <button className="flex-1 md:flex-none flex items-center justify-center space-x-3 bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-500/20 hover:bg-blue-700 hover:-translate-y-1 transition-all">
+                        <button
+                            onClick={handleDownload}
+                            className="flex-1 md:flex-none flex items-center justify-center space-x-3 bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black shadow-2xl shadow-blue-500/20 hover:bg-blue-700 hover:-translate-y-1 transition-all"
+                        >
                             <Download size={24} /> <span>Download</span>
                         </button>
                     </div>

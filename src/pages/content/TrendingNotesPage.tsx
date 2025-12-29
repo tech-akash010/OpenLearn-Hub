@@ -270,8 +270,8 @@ export const TrendingNotesPage: React.FC = () => {
                                         // Navigate to course access page for university content
                                         navigate(`/course/access/${content.id}`);
                                     } else {
-                                        // Navigate directly to note for community content
-                                        navigate(`/note/${content.id}`);
+                                        // Navigate to note with 'trending' context for proper My Drive organization
+                                        navigate(`/note/${content.id}?browseContext=trending`);
                                     }
                                 }}
                             />

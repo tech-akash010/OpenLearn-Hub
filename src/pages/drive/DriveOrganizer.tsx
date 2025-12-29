@@ -12,7 +12,11 @@ import {
   ChevronRight,
   MoreVertical,
   ArrowUpRight,
-  Database
+  Database,
+  CloudOff,
+  AlertCircle,
+  RotateCw,
+  Trash2
 } from 'lucide-react';
 import { driveSyncService } from '@/services/drive/driveSyncService';
 import { DriveItem, DriveSource } from '@/types';
@@ -41,6 +45,28 @@ export const DriveOrganizer: React.FC = () => {
     setIsSyncing(false);
   };
 
+  const handleRetryFailedSyncs = async () => {
+    setIsSyncing(true);
+    await driveSyncService.retryFailedSyncs();
+    loadItems();
+    setIsSyncing(false);
+  };
+
+  const getSyncStatusIcon = (status?: string) => {
+    switch (status) {
+      case 'synced':
+        return <Cloud size={14} className="text-green-500" />;
+      case 'pending':
+        return <Cloud size={14} className="text-yellow-500 animate-pulse" />;
+      case 'failed':
+        return <CloudOff size={14} className="text-red-500" />;
+      default:
+        return <AlertCircle size={14} className="text-gray-400" />;
+    }
+  };
+
+  const failedSyncsCount = items.filter(i => i.syncStatus === 'failed').length;
+
   const filteredItems = items.filter(item =>
     item.source === activeTab &&
     (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -59,6 +85,16 @@ export const DriveOrganizer: React.FC = () => {
           <p className="text-gray-500 mt-1">Your contributions and community downloads, organized by hierarchy.</p>
         </div>
         <div className="flex items-center space-x-3">
+          {failedSyncsCount > 0 && (
+            <button
+              onClick={handleRetryFailedSyncs}
+              disabled={isSyncing}
+              className="bg-red-50 border-2 border-red-100 text-red-600 px-5 py-2.5 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center shadow-sm disabled:opacity-50"
+            >
+              <RotateCw size={18} className={`mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+              Retry {failedSyncsCount} Failed
+            </button>
+          )}
           <button
             onClick={handleSync}
             disabled={isSyncing}
@@ -66,6 +102,18 @@ export const DriveOrganizer: React.FC = () => {
           >
             <RefreshCw size={18} className={`mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
             {isSyncing ? 'Syncing Vault...' : 'Refresh Vault'}
+          </button>
+          <button
+            onClick={() => {
+              if (window.confirm('Are you sure you want to clear all drive data? This cannot be undone.')) {
+                driveSyncService.clearAll();
+                loadItems();
+              }
+            }}
+            className="bg-red-50 border-2 border-red-100 text-red-600 p-2.5 rounded-xl hover:bg-red-100 transition-all shadow-sm"
+            title="Clear All Data (Debug)"
+          >
+            <Trash2 size={18} />
           </button>
         </div>
       </header>
@@ -171,21 +219,30 @@ export const DriveOrganizer: React.FC = () => {
                         <FileText size={24} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h5 className="font-black text-gray-900 truncate group-hover:text-blue-600 transition-colors leading-tight">
-                          {file.name}
-                        </h5>
+                        <div className="flex items-center gap-2">
+                          <h5 className="font-black text-gray-900 truncate group-hover:text-blue-600 transition-colors leading-tight">
+                            {file.name}
+                          </h5>
+                          {getSyncStatusIcon(file.syncStatus)}
+                        </div>
                         <div className="flex flex-wrap items-center mt-2 gap-3">
                           <span className="flex items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                             <Folder size={12} className="mr-1" /> {file.subjectName} / {file.topicName}
                           </span>
                           <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{file.timestamp}</span>
+                          {file.isCourseContent && (
+                            <>
+                              <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                              <span className="text-[10px] font-bold text-purple-500 uppercase tracking-widest">Course</span>
+                            </>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center space-x-3 ml-4">
                         <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${file.source === DriveSource.Uploaded
-                            ? 'border-emerald-100 bg-emerald-50 text-emerald-600'
-                            : 'border-blue-100 bg-blue-50 text-blue-600'
+                          ? 'border-emerald-100 bg-emerald-50 text-emerald-600'
+                          : 'border-blue-100 bg-blue-50 text-blue-600'
                           }`}>
                           {file.source}
                         </span>
