@@ -23,12 +23,13 @@ export const driveSyncService = {
   },
 
   async syncContribution(data: {
-    subject: Subject;
+    subject: Subject | { name: string, id: string };
     topic: Topic | { title: string, id: string };
     subtopic: Subtopic | { title: string, id: string };
     title: string;
     description?: string;
     videoUrl?: string;
+    coverImage?: string;
     contentId?: string;
     quiz?: any;
     isCourseContent?: boolean;
@@ -49,6 +50,7 @@ export const driveSyncService = {
       title: data.title,
       description: data.description,
       videoUrl: data.videoUrl,
+      coverImage: data.coverImage,  // Fallback thumbnail
       contentId: data.contentId || `up_${Date.now()}`,
       source: DriveSource.Uploaded,
       timestamp: new Date().toLocaleString(),

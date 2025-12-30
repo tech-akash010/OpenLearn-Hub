@@ -9,6 +9,7 @@ import { ShareableLink } from '@/components/ui/ShareableLink';
 import { UploadWizard } from '@/components/forms/upload/UploadWizard';
 import { UploadedDocument } from '@/types';
 import { addDemoContent, DEMO_CONTENTS } from '@/data/demoContents';
+import { driveSyncService } from '@/services/drive/driveSyncService';
 
 export const NoteUploadPage: React.FC = () => {
     const navigate = useNavigate();
@@ -136,14 +137,14 @@ export const NoteUploadPage: React.FC = () => {
         addDemoContent({
             id: newNoteId,
             title: data.title,
-            description: data.description || '',
+            description: data.description || `${data.platform} course notes for ${data.courseName} - ${data.chapter}`,
             organization: {
                 primaryPath: 'course',
                 coursePath: {
-                    provider: 'OpenLearn',
+                    provider: data.platform || 'Course Platform',
                     instructor: user.name,
-                    courseName: data.subject || 'General Course',
-                    topic: data.topic || 'General Topic',
+                    courseName: data.courseName || 'General Course',
+                    topic: data.chapter || 'General Topic',
                     resourceTitle: data.title
                 }
             },
@@ -152,7 +153,22 @@ export const NoteUploadPage: React.FC = () => {
             views: 0,
             likes: 0,
             downloads: 0,
-            videoUrl: data.videoUrl
+            videoUrl: data.verificationLink || data.videoUrl,  // Use verificationLink for thumbnail extraction
+            coverImage: data.coverImage  // Fallback if no video URL
+        });
+
+        // Sync to My Drive - Course Captures section
+        driveSyncService.syncContribution({
+            subject: { id: data.platform?.toLowerCase() || 'course', name: data.platform || 'Course' },
+            topic: { id: data.courseName?.toLowerCase().replace(/\s+/g, '_') || 'general', title: data.courseName || 'General Course' },
+            subtopic: { id: data.chapter?.toLowerCase().replace(/\s+/g, '_') || 'chapter', title: data.chapter || 'Chapter 1' },
+            title: data.title,
+            description: data.description || '',
+            videoUrl: data.verificationLink || '',  // Use verification link for thumbnail extraction
+            coverImage: data.coverImage,  // Fallback image when no video URL
+            contentId: newNoteId,
+            quiz: data.quiz,
+            isCourseContent: true  // This marks it as course content for the Course Captures tab
         });
 
         setUploadComplete(true);

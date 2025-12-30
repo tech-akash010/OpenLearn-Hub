@@ -173,25 +173,37 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({ userId }) => {
         }
 
         // Create DemoContent object from DriveItem
+        // For course content, include coursePath so the "Course" badge shows
+        const isCourseContent = driveItem.isCourseContent === true;
+
         return {
             id: driveItem.contentId || driveItem.id,
             title: driveItem.title || fileNode.name.replace('.pdf', ''),
             description: driveItem.description || 'Downloaded content',
             organization: {
-                primaryPath: 'subject',
-                subjectPath: {
+                primaryPath: isCourseContent ? 'course' : 'subject',
+                subjectPath: !isCourseContent ? {
                     subject: driveItem.subjectName,
                     coreTopic: driveItem.topicName,
                     subtopic: driveItem.subtopicName,
                     resourceTitle: driveItem.title
-                }
+                } : undefined,
+                // Add coursePath for course content to show "Course" badge
+                coursePath: isCourseContent ? {
+                    provider: driveItem.subjectName || 'Course',  // Platform name (e.g., Udemy, YouTube)
+                    instructor: uploaderName,
+                    courseName: driveItem.topicName || 'Course',
+                    topic: driveItem.subtopicName || 'Chapter',
+                    resourceTitle: driveItem.title
+                } : undefined
             },
             uploadedBy: uploaderName,
             uploadedAt: driveItem.timestamp || new Date().toISOString(),
             views: 0,
             likes: 0,
             downloads: 0,
-            videoUrl: driveItem.videoUrl // YouTube URL will be embedded by EnhancedContentCard
+            videoUrl: driveItem.videoUrl, // YouTube/verification URL will be used for thumbnail
+            coverImage: driveItem.coverImage  // Fallback image when no video URL
         } as DemoContent;
     };
 

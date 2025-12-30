@@ -11,6 +11,7 @@ export interface DemoContent {
     likes: number;
     downloads: number;
     videoUrl?: string;
+    coverImage?: string;  // Fallback image when videoUrl is not available
 }
 
 const STORAGE_KEY = 'openlearn_demo_contents_v4';

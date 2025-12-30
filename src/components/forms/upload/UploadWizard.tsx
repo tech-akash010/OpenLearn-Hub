@@ -23,6 +23,7 @@ import { ContentSourceForm } from '@/components/forms/content-source/ContentSour
 import { validateSourceRequirement } from '@/services/content/contentSourceValidator';
 import { RichTextEditor } from '@/components/editor/RichTextEditor';
 import { WatermarkInput, WatermarkConfig } from './WatermarkInput';
+import { addDemoContent } from '@/data/demoContents';
 
 interface UploadWizardProps {
   onClose: () => void;
@@ -296,18 +297,57 @@ export const UploadWizard: React.FC<UploadWizardProps> = ({ onClose, onComplete,
     const topic = INITIAL_TOPICS.find(t => t.id === selection.topic) || { title: selection.newName, id: 'new' } as any;
     const subtopic = INITIAL_SUBTOPICS.find(st => st.id === selection.subtopic) || { title: selection.newName, id: 'new' } as any;
 
+    const user = authService.getUser();
+    const contentId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const description = selection.sourceMetadata?.selfWrittenSource?.description ||
+      selection.sourceMetadata?.bookOtherSource?.description ||
+      selection.content?.substring(0, 200) ||
+      'Community contributed notes';
+    const videoUrl = selection.sourceMetadata?.youtubeSource?.url;
+
+    // Sync to My Drive
     driveSyncService.syncContribution({
       subject,
       topic,
       subtopic,
       title: selection.title,
-      description: selection.sourceMetadata?.selfWrittenSource?.description ||
-        selection.sourceMetadata?.bookOtherSource?.description ||
-        selection.content?.substring(0, 200) ||
-        'Uploaded content',
-      videoUrl: selection.sourceMetadata?.youtubeSource?.url,
-      contentId: `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      description,
+      videoUrl,
+      coverImage: selection.attachedImage || undefined,  // Fallback image when no video
+      contentId,
       quiz: selection.attachedQuiz
+    });
+
+    // Add to Trending page (DEMO_CONTENTS)
+    addDemoContent({
+      id: contentId,
+      title: selection.title,
+      description,
+      organization: {
+        primaryPath: 'subject',
+        subjectPath: {
+          subject: subject.name,
+          coreTopic: topic.title,
+          subtopic: subtopic.title,
+          resourceTitle: selection.title
+        },
+        // Add channel path if YouTube source is provided
+        ...(selection.sourceMetadata?.youtubeSource?.channelName && {
+          channelPath: {
+            channelName: selection.sourceMetadata.youtubeSource.channelName,
+            playlistName: 'Community Upload',
+            topic: topic.title,
+            resourceTitle: selection.title
+          }
+        })
+      },
+      uploadedBy: user?.name || 'Anonymous',
+      uploadedAt: new Date().toISOString(),
+      views: 0,
+      likes: 0,
+      downloads: 0,
+      videoUrl,
+      coverImage: selection.attachedImage || undefined  // Use attached image as cover if no video
     });
 
     onComplete(selection);

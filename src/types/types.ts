@@ -294,6 +294,7 @@ export interface DriveItem {
   title: string;
   description?: string; // Content description for card display
   videoUrl?: string; // YouTube/video URL for embedded playback
+  coverImage?: string; // Fallback image when videoUrl is not available
   contentId?: string; // Reference to original content
   source: DriveSource;
   timestamp: string;
